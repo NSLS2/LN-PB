@@ -1,0 +1,63 @@
+record(mbbo,    "$(S1){$(D1)}Sw:Chan4-SP") {
+  field(ZRVL,   "0")
+  field(ZRST,   "fb_in (cavity)")
+  field(ONVL,   "1")
+  field(ONST,   "fb setpoint (ramp table)")
+  field(TWVL,   "2")
+  field(TWST,   "e2")
+  field(THVL,   "3")
+  field(THST,   "e4")
+  field(FRVL,   "4")
+  field(FRST,   "Ch 1: s0b")
+  field(FVVL,   "5")
+  field(FVST,   "fdbk_err_sat")
+  field(SXVL,   "6")
+  field(SXST,   "dout40 (FF setpoint)")
+  field(SVVL,   "7")
+  field(SVST,   "din1_2")
+  field(OUT,    "$(S1){$(D1)}Cnt:Chan4-SP PP")
+  info(autosaveFields_pass1, "VAL")
+}
+
+record(longout, "$(S1){$(D1)}Cnt:Chan4-SP") {
+  field(DESC,   "ScopeCh4: ")
+  field(DTYP,   "asynInt32")
+  field(VAL,    "2")
+  field(OUT ,   "@asyn($(PORT),0)WireInADCMUX")
+}
+
+record(longout, "$(S1){$(D1)}Enbl:RefPr") {
+  field(DESC,   "RefPr enable: ")
+  field(DTYP,   "asynInt32")
+  field(VAL,    "0")
+  field(PINI,   "YES")
+  field(OUT ,   "@asyn($(PORT),0)RefPr Ena")
+}
+
+record(longout, "$(S1){$(D1)}Cnt:Zoom") {
+  field(DESC,   "Zoom selector: ")
+  field(DTYP,   "asynInt32")
+  field(HOPR,   "19")
+  field(LOPR,   "0")
+  field(OUT ,   "@asyn($(PORT),0)ZoomSelector")
+  info(autosaveFields_pass1, "VAL")
+}
+
+record(longout, "$(S1){$(D1)}Cnt:$(TBL2)RampInterval") {
+  field(DESC,   "FB ramp interval: ")
+  field(DTYP,   "asynInt32")
+  field(VAL,    "50")
+  field(OUT ,   "@asyn($(PORT),0)Rampinterval")
+  info(autosaveFields_pass1, "VAL")
+}
+
+record(longout, "$(S1){$(D1)}Cnt:TrDly") {
+  field(DESC,   "Trigger Delay:")
+  field(DTYP,   "asynInt32")
+  field(DRVH,   "32767")
+  field(DRVL,   "0")
+  field(OUT ,   "@asyn($(PORT),0)TopTrDly:EP0C")
+  info(autosaveFields_pass1, "VAL")
+}
+
+

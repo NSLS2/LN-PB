@@ -1,0 +1,6 @@
+NAME=LN-PB
+PORT=4051
+USER=softioc
+HOST=rfctrl01-vm
+CHDIR="$CHDIR/iocBoot/iocln-pb"
+EXEC="$CHDIR/st.cmd"

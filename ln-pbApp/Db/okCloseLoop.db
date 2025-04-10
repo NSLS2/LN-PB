@@ -1,0 +1,1524 @@
+record(waveform, "$(S1){$(D1)}E:StrEq-SP") {
+ field(FTVL,     "CHAR")
+ field(NELM,     "128")
+ field(DTYP,     "fileread")
+ field(INP,      "@SFuncExprPha.TXT")
+ field(PINI,     "YES")
+ info(autosaveFields_pass1, "VAL")
+}
+
+record(waveform, "$(S1){$(D1)}Phs:StrEq-SP") {
+ field(FTVL,     "CHAR")
+ field(NELM,     "128")
+ field(DTYP,     "fileread")
+ field(INP,      "@SFuncExprAmp.TXT")
+ field(PINI,     "YES")
+ info(autosaveFields_pass1, "VAL")
+}
+
+#
+# Reads out the equation C+L (instead of just C)
+# and pre-defined SFunction equations
+#
+
+record(waveform, "$(S1){$(D1)}Phs:StrRef-SP") {
+  field(FTVL,    "CHAR")
+  field(NELM,    "128")
+  field(DTYP,    "fileread")
+  field(INP,     "@RefPhaExpr.TXT")
+  field(PINI,    "YES")
+  info(autosaveFields_pass1, "VAL")
+}
+
+#
+# Sets the busy indicator which disables
+# the restart
+#
+
+record(bo,	"$(S1){$(D1)}State:Cl000-Sts") {
+  field(ZNAM,   "Idle")
+  field(ONAM,   "Busy")
+  field(PINI,   "YES")
+  field(FLNK,   "$(S1){$(D1)}State:Cl010-Clc")
+}
+
+#
+# - disables the restart ...!
+#
+
+record(calcout, "$(S1){$(D1)}State:Cl010-Clc") {
+  field(CALC,   "A")
+  field(INPA,   "$(S1){$(D1)}State:Cl000-Sts")
+  field(OUT,    "$(S1){$(D1)}State:Cl000-Sts.DISA PP")
+  field(OOPT,   "Transition To Non-zero")
+  field(FLNK,   "$(S1){$(D1)}State:Cl020-Clc")
+}
+
+record(calcout, "$(S1){$(D1)}State:Cl020-Clc") {
+  field(CALC,   "A")
+  field(INPA,   "$(S1){$(D1)}State:Cl000-Sts")
+  field(OUT,    "$(S1){$(D1)}State:Cl010-Cmd.PROC PP")
+  field(OOPT,   "Transition To Non-zero")
+}
+
+record(seq,     "$(S1){$(D1)}State:Cl010-Cmd") {
+# Disables feedback = opens the loop
+  field(DO1,    "0")
+  field(LNK1,   "$(S1){$(D1)-$(TBL2)}Enbl:Cmd PP")
+  field(DLY1,   "0")
+  field(DO2,    "1")
+  field(LNK2,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY2,   "0")
+# Disables the FF
+  field(DO3,    "0")
+  field(LNK3,   "$(S1){$(D1)-$(TBL1)}Enbl:Cmd PP")
+  field(DLY3,   "1")
+  field(DO4,    "2")
+  field(LNK4,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY4,   "0")
+# Sets the SCAN to 1 second
+# field(DO5,    "6")
+# field(DLY5,   "2")
+# field(LNK5,   "$(S1){$(D1)}Cmd:Update.SCAN PP")
+# Sets the SCAN to 2 seconds
+# field(DO5,    "5")
+# SEP. 30, 2014 - SCAN should be off from
+# integer multiples of seconds: Introduced 1.3, 2.3 seconds
+# VAL DO5 = 11 should put the SCAN to .1 second 
+# DEC. 19, 2019: VAL DO5 = 12 = SCAN to 0.05 second
+  field(DO5,    "12")
+  field(LNK5,   "$(S1){$(D1)}Cmd:Update.SCAN PP")
+  field(DLY5,   "3")
+  field(DO6,    "3")
+  field(LNK6,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY6,   "0")
+# Requests the first update
+  field(DO7,    "1")
+  field(LNK7,   "$(S1){$(D1)}Cmd:Update PP")
+  field(DLY7,   "1")
+  field(DO8,    "4")
+  field(LNK8,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY8,   "0")
+# No need to use ADC START any more: Brian MAR 18, 2013
+# The ADCs will be started automatically at table output
+# Disables the scope acquisition
+  field(DO9,    "0")
+  field(LNK9,   "$(S1){$(D1)}Enbl:ADC PP")
+  field(DLY9,   "1")
+  field(DOA,    "1")
+  field(LNKA,   "$(S1){$(D1)}State:Cl012-Cmd PP")
+  field(DLYA,   "1")
+}
+
+record(stringin, "$(S1){$(D1)-$(TBL1)}Val:C-SP") {
+  field(VAL,     "$(S1){$(D1)-$(TBL1)}E:Fb-SP CPP NMS")
+  field(PINI,    "YES")
+}
+
+record(stringout,"$(S1){$(D1)}State:Cl012-Cmd") {
+  field(DOL,     "$(S1){$(D1)-$(TBL1)}Val:C-SP")
+  field(OMSL,    "closed_loop")
+  field(OUT,     "$(S1){$(D1)-$(TBL1)}Val:C.DOL CA")
+  field(FLNK,    "$(S1){$(D1)}State:Cl013-Cmd")
+}
+
+record(stringin, "$(S1){$(D1)-$(TBL1)}Val:M-SP") {
+  field(VAL,     "$(S1){$(D1)-$(TBL1)}Phs:Fb-SP CPP NMS")
+  field(PINI,    "YES")
+}
+
+record(stringout,"$(S1){$(D1)}State:Cl013-Cmd") {
+  field(DOL,     "$(S1){$(D1)-$(TBL1)}Val:M-SP")
+  field(OMSL,    "closed_loop")
+  field(OUT,     "$(S1){$(D1)-$(TBL1)}Val:M.DOL CA")
+  field(FLNK,    "$(S1){$(D1)}State:Cl014-Cmd")
+}
+
+record(stringin, "$(S1){$(D1)-$(TBL1)}Val:W-SP") {
+  field(VAL,     "$(S1){$(D1)-Ref}Phs:Avg1-I CPP NMS")
+  field(PINI,    "YES")
+}
+
+record(stringout,"$(S1){$(D1)}State:Cl014-Cmd") {
+  field(DOL,     "$(S1){$(D1)-$(TBL1)}Val:W-SP")
+  field(OMSL,    "closed_loop")
+  field(OUT,     "$(S1){$(D1)-$(TBL1)}Val:W.DOL CA")
+  field(FLNK,    "$(S1){$(D1)}State:Cl015-Cmd")
+}
+
+record(stringin, "$(S1){$(D1)-$(TBL2)}Val:C-SP") {
+  field(VAL,     "$(S1){$(D1)}E:Fb-SP CPP NMS")
+  field(PINI,    "YES")
+}
+
+record(stringout,"$(S1){$(D1)}State:Cl015-Cmd") {
+  field(DOL,     "$(S1){$(D1)-$(TBL2)}Val:C-SP")
+  field(OMSL,    "closed_loop")
+  field(OUT,     "$(S1){$(D1)-$(TBL2)}Val:C.DOL CA")
+  field(FLNK,    "$(S1){$(D1)}State:Cl016-Cmd")
+}
+
+record(stringin, "$(S1){$(D1)-$(TBL2)}Val:M-SP") {
+  field(VAL,     "$(S1){$(D1)}Phs:Fb-SP CPP NMS")
+  field(PINI,    "YES")
+}
+
+record(stringout,"$(S1){$(D1)}State:Cl016-Cmd") {
+  field(DOL,     "$(S1){$(D1)-$(TBL2)}Val:M-SP")
+  field(OMSL,    "closed_loop")
+  field(OUT,     "$(S1){$(D1)-$(TBL2)}Val:M.DOL CA")
+  field(FLNK,    "$(S1){$(D1)}State:Cl017-Cmd")
+}
+
+record(stringin, "$(S1){$(D1)-$(TBL2)}Val:W-SP") {
+  field(VAL,     "$(S1){$(D1)-Ref}Phs:Avg1-I CPP NMS")
+  field(PINI,    "YES")
+}
+
+record(stringout,"$(S1){$(D1)}State:Cl017-Cmd") {
+  field(DOL,     "$(S1){$(D1)-$(TBL2)}Val:W-SP")
+  field(OMSL,    "closed_loop")
+  field(OUT,     "$(S1){$(D1)-$(TBL2)}Val:W.DOL CA")
+  field(FLNK,    "$(S1){$(D1)}State:Cl018-Cmd")
+}
+
+#==============================================================
+#
+# MAR 21, 2014: E. Blum requested that Inhibit RF
+# (and other interlocks) should be RESET here!
+# The FF will be turned on first at step State:Cl260
+#
+#==============================================================
+
+record(seq,    "$(S1){$(D1)}State:Cl018-Cmd") {
+  field(DESC,  "Reset trips:")
+  field(DO1,   "1")
+  field(LNK1,  "$(S1){$(D1)}Rst:SoftTrip-Cmd PP")
+  field(DO2,   "1")
+  field(LNK2,  "$(S1){$(D1)}Rst:AV2-Cmd PP")
+  field(DO3,   "1")
+  field(LNK3,  "$(S1){$(D1)}Rst:PPS-Cmd PP")
+  field(DO4,   "1")
+  field(LNK4,  "$(S1){$(D1)}Rst:Quench-Cmd PP")
+  field(DO5,   "1")
+  field(LNK5,  "$(S1){$(D1)}Rst:VacTrip-Cmd PP")
+  field(DO6,   "1")
+  field(LNK6,  "$(S1){$(D1)}Rst:InhRF-Cmd PP")
+  field(FLNK,  "$(S1){$(D1)}State:Cl020-Cmd")
+}
+
+record(seq,     "$(S1){$(D1)}State:Cl020-Cmd") {
+  field(DO1,    "5")
+  field(LNK1,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY1,   "0")
+# Sets the measurement window start to 0
+  field(DO2,    "0")
+  field(LNK2,   "$(S1){$(D1)}Time:Wnd0-SP PP")
+  field(DLY2,   "1")
+  field(DO3,    "6")
+  field(LNK3,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY3,   "0")
+# Sets the measurement window width to 800 ms
+  field(DO4,    "800")
+  field(LNK4,   "$(S1){$(D1)}Time:WndW-SP PP")
+  field(DLY4,   "1")
+  field(DO5,    "7")
+  field(LNK5,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY5,   "0")
+#
+# Sets the FF amplitude control setpoint to 0.01
+# a small value
+#
+  field(DO6,    "0.01")
+  field(LNK6,   "$(S1){$(D1)-$(TBL1)}E:Fb-SP PP")
+  field(DLY6,   "1")
+  field(DO7,    "8")
+  field(LNK7,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY7,   "0")
+#
+# Sets the FF phase setpoint to 1.0
+#
+  field(DO8,    "1.0")
+  field(LNK8,   "$(S1){$(D1)-$(TBL1)}Phs:Fb-SP PP")
+  field(DLY8,   "1")
+  field(DO9,    "9")
+  field(LNK9,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY9,   "0")
+  field(DOA,    "1")
+  field(LNKA,   "$(S1){$(D1)}State:Cl030-Cmd PP")
+  field(DLYA,   "1")
+}
+
+#
+# Copies the phase expression, C+L, to the CW field
+#
+
+record(acalcout,"$(S1){$(D1)}State:Cl030-Cmd") {
+  field(DESC,   "Waveform copy:")
+  field(CALC,   "AA")
+  field(INAA,   "$(S1){$(D1)}Phs:StrRef-SP")
+  field(NELM,   "128")
+  field(OUT,    "$(S1){$(D1)-$(TBL1)}Phs:Eq2 PP")
+  field(FLNK,   "$(S1){$(D1)}State:Cl040-Cmd")
+}
+
+record(seq,	"$(S1){$(D1)}State:Cl040-Cmd") {
+# Disable external trigger
+  field(DO1,    "0")
+#
+# Don't do it for the test stand in the RF cage!
+#
+# field(LNK1,   "$(S1){$(D1)-$(D2)}Val:Dummy-SP")
+#
+# field(LNK1,   "BR-TS{EVR:L1A}Ena-Sel CPP")
+# 
+# Use BR-TS{EVR:L1A-Out:FP0}Ena-SP instead
+# SEP. 30, 2014: FP0 is connected to the scopes,
+# FP1 to the controlling CFC
+  field(LNK1,   "BR-TS{EVR:L1A-Out:FP0}Ena-SP CPP")
+#
+# For test bench use the timing card in the cage:
+# RF-TST{EVR:PMC-Out:FP0}Ena-SP
+# field(LNK1,   "RF-TST{EVR:PMC-Out:FP0}Ena-SP CPP")
+  field(DLY1,   "2")
+#
+  field(FLNK,   "$(S1){$(D1)}State:Cl050-Cmd")
+}
+
+#*****************************************************************************************
+#=========================================================================================
+#
+# Have to set OMSL fields to "supervisory" = 0 or "closed_loop" = 1 first!
+#
+
+record(seq,     "$(S1){$(D1)}State:Cl050-Cmd") {
+#
+# Sets the Amp and Pha expr C fields to "closed_loop"
+#
+  field(DO1,    "1")
+  field(LNK1,   "$(S1){$(D1)-$(TBL1)}Val:C.OMSL PP")
+  field(DLY1,   "0")
+  field(DO2,    "10")
+  field(LNK2,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY2,   "0")
+  field(DO3,    "1")
+  field(LNK3,   "$(S1){$(D1)-$(TBL1)}Val:M.OMSL PP")
+  field(DLY3,   "0")
+  field(DO4,    "11")
+  field(LNK4,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY4,   "0")
+#
+  field(DO5,    "1")
+  field(LNK5,   "$(S1){$(D1)-$(TBL2)}Val:C.OMSL PP")
+  field(DLY5,   "0")
+  field(DO6,    "12")
+  field(LNK6,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY6,   "0")
+  field(DO7,    "1")
+  field(LNK7,   "$(S1){$(D1)-$(TBL2)}Val:M.OMSL PP")
+  field(DLY7,   "0")
+  field(DO8,    "13")
+  field(LNK8,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY8,   "0")
+  field(FLNK,   "$(S1){$(D1)}State:Cl060-Cmd")
+}
+
+record(seq,     "$(S1){$(D1)}State:Cl060-Cmd") {
+#
+# Sets the Amp and Pha expr D fields to "supervisory"
+#
+  field(DO1,    "0")
+  field(LNK1,   "$(S1){$(D1)-$(TBL1)}Val:D.OMSL PP")
+  field(DLY1,   "0")
+  field(DO2,    "14")
+  field(LNK2,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY2,   "0")
+  field(DO3,    "0")
+  field(LNK3,   "$(S1){$(D1)-$(TBL1)}Val:N.OMSL PP")
+  field(DLY3,   "0")
+  field(DO4,    "15")
+  field(LNK4,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY4,   "0")
+#
+  field(DO5,    "0")
+  field(LNK5,   "$(S1){$(D1)-$(TBL2)}Val:D.OMSL PP")
+  field(DLY5,   "0")
+  field(DO6,    "16")
+  field(LNK6,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY6,   "0")
+  field(DO7,    "0")
+  field(LNK7,   "$(S1){$(D1)-$(TBL2)}Val:N.OMSL PP")
+  field(DLY7,   "0")
+  field(DO8,    "17")
+  field(LNK8,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY8,   "0")
+  field(FLNK,   "$(S1){$(D1)}State:Cl070-Cmd")
+}
+
+record(seq,     "$(S1){$(D1)}State:Cl070-Cmd") {
+#
+# Sets the Amp and Pha expr E fields to "supervisory"
+#
+  field(DO1,    "0")
+  field(LNK1,   "$(S1){$(D1)-$(TBL1)}Val:E.OMSL PP")
+  field(DLY1,   "0")
+  field(DO2,    "18")
+  field(LNK2,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY2,   "0")
+  field(DO3,    "0")
+  field(LNK3,   "$(S1){$(D1)-$(TBL1)}Val:O.OMSL PP")
+  field(DLY3,   "0")
+  field(DO4,    "19")
+  field(LNK4,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY4,   "0")
+#
+  field(DO5,    "0")
+  field(LNK5,   "$(S1){$(D1)-$(TBL2)}Val:E.OMSL PP")
+  field(DLY5,   "0")
+  field(DO6,    "20")
+  field(LNK6,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY6,   "0")
+  field(DO7,    "0")
+  field(LNK7,   "$(S1){$(D1)-$(TBL2)}Val:O.OMSL PP")
+  field(DLY7,   "0")
+  field(DO8,    "21")
+  field(LNK8,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY8,   "0")
+  field(FLNK,   "$(S1){$(D1)}State:Cl080-Cmd")
+}
+
+record(seq,     "$(S1){$(D1)}State:Cl080-Cmd") {
+#
+# Sets the Amp and Pha expr F fields to "supervisory"
+#
+  field(DO1,    "0")
+  field(LNK1,   "$(S1){$(D1)-$(TBL1)}Val:F.OMSL PP")
+  field(DLY1,   "0")
+  field(DO2,    "22")
+  field(LNK2,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY2,   "0")
+  field(DO3,    "0")
+  field(LNK3,   "$(S1){$(D1)-$(TBL1)}Val:P.OMSL PP")
+  field(DLY3,   "0")
+  field(DO4,    "23")
+  field(LNK4,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY4,   "0")
+#
+  field(DO5,    "0")
+  field(LNK5,   "$(S1){$(D1)-$(TBL2)}Val:F.OMSL PP")
+  field(DLY5,   "0")
+  field(DO6,    "24")
+  field(LNK6,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY6,   "0")
+  field(DO7,    "0")
+  field(LNK7,   "$(S1){$(D1)-$(TBL2)}Val:P.OMSL PP")
+  field(DLY7,   "0")
+  field(DO8,    "25")
+  field(LNK8,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY8,   "0")
+  field(FLNK,   "$(S1){$(D1)}State:Cl090-Cmd")
+}
+
+record(seq,     "$(S1){$(D1)}State:Cl090-Cmd") {
+#
+# Sets the Amp and Pha expr G fields to "supervisory"
+#
+  field(DO1,    "0")
+  field(LNK1,   "$(S1){$(D1)-$(TBL1)}Val:G.OMSL PP")
+  field(DLY1,   "0")
+  field(DO2,    "26")
+  field(LNK2,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY2,   "0")
+  field(DO3,    "0")
+  field(LNK3,   "$(S1){$(D1)-$(TBL1)}Val:R.OMSL PP")
+  field(DLY3,   "0")
+  field(DO4,    "27")
+  field(LNK4,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY4,   "0")
+#
+  field(DO5,    "0")
+  field(LNK5,   "$(S1){$(D1)-$(TBL2)}Val:G.OMSL PP")
+  field(DLY5,   "0")
+  field(DO6,    "28")
+  field(LNK6,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY6,   "0")
+  field(DO7,    "0")
+  field(LNK7,   "$(S1){$(D1)-$(TBL2)}Val:R.OMSL PP")
+  field(DLY7,   "0")
+  field(DO8,    "29")
+  field(LNK8,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY8,   "0")
+  field(FLNK,   "$(S1){$(D1)}State:Cl100-Cmd")
+}
+
+record(seq,     "$(S1){$(D1)}State:Cl100-Cmd") {
+#
+# Sets the Amp and Pha expr H fields to "supervisory"
+#
+  field(DO1,    "0")
+  field(LNK1,   "$(S1){$(D1)-$(TBL1)}Val:H.OMSL PP")
+  field(DLY1,   "0")
+  field(DO2,    "30")
+  field(LNK2,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY2,   "0")
+  field(DO3,    "0")
+  field(LNK3,   "$(S1){$(D1)-$(TBL1)}Val:S.OMSL PP")
+  field(DLY3,   "0")
+  field(DO4,    "31")
+  field(LNK4,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY4,   "0")
+#
+  field(DO5,    "0")
+  field(LNK5,   "$(S1){$(D1)-$(TBL2)}Val:H.OMSL PP")
+  field(DLY5,   "0")
+  field(DO6,    "32")
+  field(LNK6,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY6,   "0")
+  field(DO7,    "0")
+  field(LNK7,   "$(S1){$(D1)-$(TBL2)}Val:S.OMSL PP")
+  field(DLY7,   "0")
+  field(DO8,    "33")
+  field(LNK8,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY8,   "0")
+  field(FLNK,   "$(S1){$(D1)}State:Cl110-Cmd")
+}
+
+record(seq,     "$(S1){$(D1)}State:Cl110-Cmd") {
+#
+# Sets the Amp and Pha expr I fields to "supervisory"
+#
+  field(DO1,    "0")
+  field(LNK1,   "$(S1){$(D1)-$(TBL1)}Val:I.OMSL PP")
+  field(DLY1,   "0")
+  field(DO2,    "34")
+  field(LNK2,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY2,   "0")
+  field(DO3,    "0")
+  field(LNK3,   "$(S1){$(D1)-$(TBL1)}Val:T.OMSL PP")
+  field(DLY3,   "0")
+  field(DO4,    "35")
+  field(LNK4,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY4,   "0")
+#
+  field(DO5,    "0")
+  field(LNK5,   "$(S1){$(D1)-$(TBL2)}Val:I.OMSL PP")
+  field(DLY5,   "0")
+  field(DO6,    "36")
+  field(LNK6,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY6,   "0")
+  field(DO7,    "0")
+  field(LNK7,   "$(S1){$(D1)-$(TBL2)}Val:T.OMSL PP")
+  field(DLY7,   "0")
+  field(DO8,    "37")
+  field(LNK8,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY8,   "0")
+  field(FLNK,   "$(S1){$(D1)}State:Cl120-Cmd")
+}
+
+record(seq,     "$(S1){$(D1)}State:Cl120-Cmd") {
+#
+# Sets the Amp and Pha expr J fields to "supervisory"
+#
+  field(DO1,    "0")
+  field(LNK1,   "$(S1){$(D1)-$(TBL1)}Val:J.OMSL PP")
+  field(DLY1,   "0")
+  field(DO2,    "38")
+  field(LNK2,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY2,   "0")
+  field(DO3,    "0")
+  field(LNK3,   "$(S1){$(D1)-$(TBL1)}Val:U.OMSL PP")
+  field(DLY3,   "0")
+  field(DO4,    "39")
+  field(LNK4,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY4,   "0")
+#
+  field(DO5,    "0")
+  field(LNK5,   "$(S1){$(D1)-$(TBL2)}Val:J.OMSL PP")
+  field(DLY5,   "0")
+  field(DO6,    "40")
+  field(LNK6,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY6,   "0")
+  field(DO7,    "0")
+  field(LNK7,   "$(S1){$(D1)-$(TBL2)}Val:U.OMSL PP")
+  field(DLY7,   "0")
+  field(DO8,    "41")
+  field(LNK8,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY8,   "0")
+  field(FLNK,   "$(S1){$(D1)}State:Cl130-Cmd")
+}
+
+record(seq,     "$(S1){$(D1)}State:Cl130-Cmd") {
+#
+# Sets the Amp and Pha expr K fields to "supervisory"
+#
+  field(DO1,    "0")
+  field(LNK1,   "$(S1){$(D1)-$(TBL1)}Val:K.OMSL PP")
+  field(DLY1,   "0")
+  field(DO2,    "42")
+  field(LNK2,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY2,   "0")
+  field(DO3,    "0")
+  field(LNK3,   "$(S1){$(D1)-$(TBL1)}Val:V.OMSL PP")
+  field(DLY3,   "0")
+  field(DO4,    "43")
+  field(LNK4,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY4,   "0")
+#
+  field(DO5,    "0")
+  field(LNK5,   "$(S1){$(D1)-$(TBL2)}Val:K.OMSL PP")
+  field(DLY5,   "0")
+  field(DO6,    "44")
+  field(LNK6,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY6,   "0")
+  field(DO7,    "0")
+  field(LNK7,   "$(S1){$(D1)-$(TBL2)}Val:V.OMSL PP")
+  field(DLY7,   "0")
+  field(DO8,    "45")
+  field(LNK8,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY8,   "0")
+  field(FLNK,   "$(S1){$(D1)}State:Cl140-Cmd")
+}
+
+record(seq,     "$(S1){$(D1)}State:Cl140-Cmd") {
+#
+# Sets the Amp L field to "supervisory"
+#
+  field(DO1,    "0")
+  field(LNK1,   "$(S1){$(D1)-$(TBL1)}Val:L.OMSL PP")
+  field(DLY1,   "0")
+  field(DO2,    "46")
+  field(LNK2,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY2,   "0")
+  field(DO3,    "1")
+  field(LNK3,   "$(S1){$(D1)-$(TBL1)}Val:W.OMSL PP")
+  field(DLY3,   "0")
+  field(DO4,    "47")
+  field(LNK4,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY4,   "0")
+#
+# Sets the Pha L field to "closed_loop"
+#
+  field(DO5,    "0")
+  field(LNK5,   "$(S1){$(D1)-$(TBL2)}Val:L.OMSL PP")
+  field(DLY5,   "0")
+  field(DO6,    "48")
+  field(LNK6,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY6,   "0")
+  field(DO7,    "1")
+  field(LNK7,   "$(S1){$(D1)-$(TBL2)}Val:W.OMSL PP")
+  field(DLY7,   "0")
+  field(DO8,    "49")
+  field(LNK8,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY8,   "0")
+  field(FLNK,   "$(S1){$(D1)}State:Cl150-Cmd")
+}
+
+#-----------------------------------------------------------------------------------------
+# - - - - And now set the values ....
+#-----------------------------------------------------------------------------------------
+
+record(seq,     "$(S1){$(D1)}State:Cl150-Cmd") {
+#
+# Sets the Amp expr D fields to 51 for both FF and FB
+#
+  field(DO1,    "51")
+  field(LNK1,   "$(S1){$(D1)-$(TBL1)}Val:D PP")
+  field(DLY1,   "0")
+  field(DO2,    "50")
+  field(LNK2,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY2,   "0")
+  field(DO3,    "51")
+  field(LNK3,   "$(S1){$(D1)-$(TBL1)}Val:N PP")
+  field(DLY3,   "0")
+  field(DO4,    "51")
+  field(LNK4,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY4,   "0")
+#
+# Sets the Pha expr D fields to 51 for both FF and FB
+#
+  field(DO5,    "51")
+  field(LNK5,   "$(S1){$(D1)-$(TBL2)}Val:D PP")
+  field(DLY5,   "0")
+  field(DO6,    "52")
+  field(LNK6,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY6,   "0")
+  field(DO7,    "51")
+  field(LNK7,   "$(S1){$(D1)-$(TBL2)}Val:N PP")
+  field(DLY7,   "0")
+  field(DO8,    "53")
+  field(LNK8,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY8,   "0")
+  field(FLNK,   "$(S1){$(D1)}State:Cl160-Cmd")
+}
+
+record(seq,     "$(S1){$(D1)}State:Cl160-Cmd") {
+#
+# Sets the Amp expr E fields to 176 for both FF and FB
+#
+  field(DO1,    "176")
+  field(LNK1,   "$(S1){$(D1)-$(TBL1)}Val:E PP")
+  field(DLY1,   "0")
+  field(DO2,    "54")
+  field(LNK2,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY2,   "0")
+  field(DO3,    "176")
+  field(LNK3,   "$(S1){$(D1)-$(TBL1)}Val:O PP")
+  field(DLY3,   "0")
+  field(DO4,    "55")
+  field(LNK4,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY4,   "0")
+#
+# Sets the Pha expr F fields to 176 for both FF and FB
+#
+  field(DO5,    "176")
+  field(LNK5,   "$(S1){$(D1)-$(TBL2)}Val:E PP")
+  field(DLY5,   "0")
+  field(DO6,    "56")
+  field(LNK6,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY6,   "0")
+  field(DO7,    "176")
+  field(LNK7,   "$(S1){$(D1)-$(TBL2)}Val:O PP")
+  field(DLY7,   "0")
+  field(DO8,    "57")
+  field(LNK8,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY8,   "0")
+  field(FLNK,   "$(S1){$(D1)}State:Cl170-Cmd")
+}
+
+record(seq,     "$(S1){$(D1)}State:Cl170-Cmd") {
+#
+# Sets the Amp expr F fields to 215 for both FF and FB
+#
+  field(DO1,    "215")
+  field(LNK1,   "$(S1){$(D1)-$(TBL1)}Val:F PP")
+  field(DLY1,   "0")
+  field(DO2,    "58")
+  field(LNK2,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY2,   "0")
+  field(DO3,    "215")
+  field(LNK3,   "$(S1){$(D1)-$(TBL1)}Val:P PP")
+  field(DLY3,   "1")
+  field(DO4,    "59")
+  field(LNK4,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY4,   "0")
+#
+# Sets the Pha expr F fields to 215 for both FF and FB
+#
+  field(DO5,    "215")
+  field(LNK5,   "$(S1){$(D1)-$(TBL2)}Val:F PP")
+  field(DLY5,   "0")
+  field(DO6,    "60")
+  field(LNK6,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY6,   "0")
+  field(DO7,    "215")
+  field(LNK7,   "$(S1){$(D1)-$(TBL2)}Val:P PP")
+  field(DLY7,   "0")
+  field(DO8,    "61")
+  field(LNK8,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY8,   "0")
+  field(FLNK,   "$(S1){$(D1)}State:Cl180-Cmd")
+}
+
+record(seq,     "$(S1){$(D1)}State:Cl180-Cmd") {
+#
+# Sets the Amp expr G fields to 0.847 for both FF and FB
+# DEC. 9, 2013: Extraction flat top downscaled to 0.451
+# to match the value from the rampmanager
+  field(DO1,    "0.451")
+  field(LNK1,   "$(S1){$(D1)-$(TBL1)}Val:G PP")
+  field(DLY1,   "0")
+  field(DO2,    "62")
+  field(LNK2,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY2,   "0")
+  field(DO3,    "1.0")
+  field(LNK3,   "$(S1){$(D1)-$(TBL1)}Val:R PP")
+  field(DLY3,   "0")
+  field(DO4,    "63")
+  field(LNK4,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY4,   "0")
+#
+# Sets the Pha expr G fields to 1.0 for both FF and FB
+#
+  field(DO5,    "0.451")
+  field(LNK5,   "$(S1){$(D1)-$(TBL2)}Val:G PP")
+  field(DLY5,   "0")
+  field(DO6,    "64")
+  field(LNK6,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY6,   "0")
+  field(DO7,    "1.0")
+  field(LNK7,   "$(S1){$(D1)-$(TBL2)}Val:R PP")
+  field(DLY7,   "0")
+  field(DO8,    "65")
+  field(LNK8,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY8,   "0")
+  field(FLNK,   "$(S1){$(D1)}State:Cl190-Cmd")
+}
+
+record(seq,     "$(S1){$(D1)}State:Cl190-Cmd") {
+#
+# Sets the Amp expr H fields to 0.0 for both FF and FB
+#
+  field(DO1,    "0")
+  field(LNK1,   "$(S1){$(D1)-$(TBL1)}Val:H PP")
+  field(DLY1,   "0")
+  field(DO2,    "66")
+  field(LNK2,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY2,   "0")
+  field(DO3,    "0")
+  field(LNK3,   "$(S1){$(D1)-$(TBL1)}Val:S PP")
+  field(DLY3,   "0")
+  field(DO4,    "67")
+  field(LNK4,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY4,   "0")
+#
+# Sets the Pha expr H fields to 0 for both FF and FB
+#
+  field(DO5,    "0")
+  field(LNK5,   "$(S1){$(D1)-$(TBL2)}Val:H PP")
+  field(DLY5,   "0")
+  field(DO6,    "68")
+  field(LNK6,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY6,   "0")
+  field(DO7,    "1.0")
+  field(LNK7,   "$(S1){$(D1)-$(TBL2)}Val:S PP")
+  field(DLY7,   "0")
+  field(DO8,    "69")
+  field(LNK8,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY8,   "0")
+  field(FLNK,   "$(S1){$(D1)}State:Cl200-Cmd")
+}
+
+record(seq,     "$(S1){$(D1)}State:Cl200-Cmd") {
+#
+# Sets the Amp expr I fields to 307.0 for both FF and FB
+#
+  field(DO1,    "307.0")
+  field(LNK1,   "$(S1){$(D1)-$(TBL1)}Val:I PP")
+  field(DLY1,   "0")
+  field(DO2,    "70")
+  field(LNK2,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY2,   "0")
+  field(DO3,    "0")
+  field(LNK3,   "$(S1){$(D1)-$(TBL1)}Val:T PP")
+  field(DLY3,   "0")
+  field(DO4,    "71")
+  field(LNK4,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY4,   "0")
+#
+# Sets the Pha expr I fields to 0 for both FF and FB
+#
+  field(DO5,    "307")
+  field(LNK5,   "$(S1){$(D1)-$(TBL2)}Val:I PP")
+  field(DLY5,   "0")
+  field(DO6,    "72")
+  field(LNK6,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY6,   "0")
+  field(DO7,    "0")
+  field(LNK7,   "$(S1){$(D1)-$(TBL2)}Val:T PP")
+  field(DLY7,   "0")
+  field(DO8,    "73")
+  field(LNK8,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY8,   "0")
+  field(FLNK,   "$(S1){$(D1)}State:Cl210-Cmd")
+}
+
+record(seq,     "$(S1){$(D1)}State:Cl210-Cmd") {
+#
+# Sets the Amp expr J fields to 450.0 for both FF and FB
+#
+  field(DO1,    "450.0")
+  field(LNK1,   "$(S1){$(D1)-$(TBL1)}Val:J PP")
+  field(DLY1,   "0")
+  field(DO2,    "74")
+  field(LNK2,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY2,   "0")
+  field(DO3,    "450.0")
+  field(LNK3,   "$(S1){$(D1)-$(TBL1)}Val:U PP")
+  field(DLY3,   "0")
+  field(DO4,    "75")
+  field(LNK4,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY4,   "0")
+#
+# Sets the Pha expr J fields to 450 for both FF and FB
+#
+  field(DO5,    "450.0")
+  field(LNK5,   "$(S1){$(D1)-$(TBL2)}Val:J PP")
+  field(DLY5,   "0")
+  field(DO6,    "76")
+  field(LNK6,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY6,   "0")
+  field(DO7,    "450.0")
+  field(LNK7,   "$(S1){$(D1)-$(TBL2)}Val:U PP")
+  field(DLY7,   "0")
+  field(DO8,    "77")
+  field(LNK8,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY8,   "0")
+  field(FLNK,   "$(S1){$(D1)}State:Cl220-Cmd")
+}
+
+record(seq,     "$(S1){$(D1)}State:Cl220-Cmd") {
+#
+# Sets the Amp expr K fields to 0 for both FF and FB
+#
+  field(DO1,    "0")
+  field(LNK1,   "$(S1){$(D1)-$(TBL1)}Val:K PP")
+  field(DLY1,   "0")
+  field(DO2,    "78")
+  field(LNK2,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY2,   "0")
+  field(DO3,    "411.0")
+  field(LNK3,   "$(S1){$(D1)-$(TBL1)}Val:V PP")
+  field(DLY3,   "0")
+  field(DO4,    "79")
+  field(LNK4,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY4,   "0")
+#
+# Sets the Pha expr K fields to 411 for both FF and FB
+#
+  field(DO5,    "0.0")
+  field(LNK5,   "$(S1){$(D1)-$(TBL2)}Val:K PP")
+  field(DLY5,   "0")
+  field(DO6,    "80")
+  field(LNK6,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY6,   "0")
+  field(DO7,    "411.0")
+  field(LNK7,   "$(S1){$(D1)-$(TBL2)}Val:V PP")
+  field(DLY7,   "0")
+  field(DO8,    "81")
+  field(LNK8,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY8,   "0")
+  field(FLNK,   "$(S1){$(D1)}State:Cl230-Cmd")
+}
+
+record(seq,     "$(S1){$(D1)}State:Cl230-Cmd") {
+#
+# Sets the Amp expr L fields to 0 for both FF and FB
+#
+  field(DO1,    "0")
+  field(LNK1,   "$(S1){$(D1)-$(TBL1)}Val:L PP")
+  field(DLY1,   "0")
+  field(DO2,    "82")
+  field(LNK2,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY2,   "0")
+
+  field(DO3,    "0.0")
+  field(LNK3,   "$(S1){$(D1)-$(TBL2)}Val:L PP")
+  field(DLY3,   "0")
+
+  field(DO4,    "83")
+  field(LNK4,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY4,   "0")
+  field(FLNK,   "$(S1){$(D1)}State:Cl240-Cmd PP")
+}
+
+#=========================================================================================
+#*****************************************************************************************
+
+record(seq,     "$(S1){$(D1)}State:Cl240-Cmd") {
+#
+# Sets the amplitude expression to C for CW field
+#
+  field(DO1,    "67")
+  field(LNK1,   "$(S1){$(D1)-$(TBL1)}E:Eq2 PP")
+  field(DLY1,   "0")
+  field(DO2,    "84")
+  field(LNK2,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY2,   "0")
+
+#
+# Sets the expression selection to CW = 1
+#
+  field(DO3,    "1")
+  field(LNK3,   "$(S1){$(D1)-$(TBL1)}Cnt:Eq-Sel PP")
+  field(DLY3,   "0")
+  field(DO4,    "85")
+  field(LNK4,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY4,   "0")
+#
+# Sets the FF Amp variable C to "closed_loop"
+#
+  field(DO5,    "1")
+  field(LNK5,   "$(S1){$(D1)-$(TBL1)}Val:C.OMSL PP")
+  field(DLY5,   "1")
+  field(DO6,    "86")
+  field(LNK6,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY6,   "0")
+#
+# Sets the FF Pha variable "C" (M) to "closed_loop"
+#
+  field(DO7,    "1")
+  field(LNK7,   "$(S1){$(D1)-$(TBL1)}Val:M.OMSL PP")
+  field(DLY7,   "1")
+  field(DO8,    "87")
+  field(LNK8,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY8,   "0")
+#
+# Sets the FF ref pha variable "L" (W) to "closed_loop"
+#
+  field(DO9,    "1")
+  field(LNK9,   "$(S1){$(D1)-$(TBL1)}Val:W.OMSL PP")
+  field(DLY9,   "1")
+  field(DOA,    "1")
+  field(LNKA,   "$(S1){$(D1)}State:Cl250-Cmd PP")
+  field(DLYA,   "1")
+}
+
+record(seq,     "$(S1){$(D1)}State:Cl250-Cmd") {
+  field(DO1,    "88")
+  field(LNK1,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY1,   "0")
+#
+# Applies the FF settings
+#
+  field(DO2,    "1")
+  field(LNK2,   "$(S1){$(D1)-$(TBL1)}Cmd:Apply PP")
+  field(DLY2,   "1")
+  field(DO3,    "89")
+  field(LNK3,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY3,   "0")
+#
+# Sets the FF CW amplitude to 0.01
+#
+  field(DO4,    "0.01")
+  field(LNK4,   "$(S1){$(D1)-$(TBL1)}E:Fb-SP PP")
+  field(DLY4,   "1")
+  field(DO5,    "89")
+  field(LNK5,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY5,   "0")
+#
+# Sets the FF CW phase to 1.0 degrees
+# (These setpoint changes should be implemented through SFunction!)
+#
+  field(DO6,    "1.0")
+  field(LNK6,   "$(S1){$(D1)-$(TBL1)}Phs:Fb-SP PP")
+  field(DLY6,   "1")
+  field(DO7,    "90")
+  field(LNK7,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY7,   "0")
+#
+# Applies the FF settings!
+#
+  field(DO8,    "1")
+  field(LNK8,   "$(S1){$(D1)-$(TBL1)}Cmd:Apply PP")
+  field(DLY8,   "5")
+  field(DO9,    "91")
+  field(LNK9,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY9,   "0")
+  field(DOA,    "1")
+  field(LNKA,   "$(S1){$(D1)}State:Cl260-Cmd PP")
+  field(DLYA,   "1")
+}
+
+record(seq,     "$(S1){$(D1)}State:Cl260-Cmd") {
+#
+# Sets the FF dutycycle to single
+# 
+  field(DO1,    "0")
+  field(LNK1,   "$(S1){$(D1)-$(TBL1)}Mode:SP PP")
+  field(DLY1,   "1")
+  field(DO2,    "92")
+  field(LNK2,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY2,   "0")
+#
+# Sets the zoom selector to 14
+# (This should done before enabling the FF!)
+#
+  field(DO3,    "14")
+  field(LNK3,   "$(S1){$(D1)}Cnt:Zoom PP")
+  field(DLY3,   "2")
+  field(DO4,    "93")
+  field(LNK4,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY4,   "0")
+#
+# Sets the ramp interval to 4879
+#
+  field(DO5,    "4879")
+  field(LNK5,   "$(S1){$(D1)}Cnt:$(TBL2)RampInterval PP")
+  field(DLY5,   "0")
+#
+# Turns the FF On!
+#
+  field(DO6,    "1")
+  field(LNK6,   "$(S1){$(D1)-$(TBL1)}Enbl:Cmd PP")
+  field(DLY6,   "5")
+  field(DO7,    "94")
+  field(LNK7,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY7,   "0")
+#
+# Applies the settings!
+#
+  field(DO8,    "1")
+  field(LNK8,   "$(S1){$(D1)-$(TBL1)}Cmd:Apply PP")
+  field(DLY8,   "5")
+  field(DO9,    "95")
+  field(LNK9,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY9,   "0")
+  field(FLNK,   "$(S1){$(D1)}State:Cl270-Cmd PP")
+}
+
+#=========================================================================================
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# Ramp up FF slowly using the SFunction ...
+#
+
+record(seq,     "$(S1){$(D1)}State:Cl270-Cmd") {
+#
+# Sets the FF Amp expr G = 0.148
+#
+  field(DO1,    "0.148")
+  field(LNK1,   "$(S1){$(D1)-$(TBL1)}Val:G PP")
+  field(DLY1,   "0")
+  field(DO2,    "96")
+  field(LNK2,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY2,   "0")
+#
+# Select FF Pha expr G = C (no ramp!)
+#
+  field(DOL3,   "$(S1){$(D1)-$(TBL1)}Val:M")
+  field(LNK3,   "$(S1){$(D1)-$(TBL1)}Val:R PP")
+  field(DLY3,   "0")
+  field(DO4,    "97")
+  field(LNK4,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY4,   "0")
+#
+# Select FF expr = SFunc = 2
+#
+  field(DO5,    "2")
+  field(LNK5,   "$(S1){$(D1)-$(TBL1)}Cnt:Eq-Sel PP")
+  field(DLY5,   "5")
+  field(DO6,    "98")
+  field(LNK6,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY6,   "0")
+#
+# Expression apply!
+#
+  field(DO7,    "1")
+  field(LNK7,   "$(S1){$(D1)-$(TBL1)}Cmd:Apply PP")
+  field(DLY7,   "2")
+  field(DO8,    "99")
+  field(LNK8,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY8,   "0")
+  field(FLNK,   "$(S1){$(D1)}State:Cl280-Cmd")
+}
+
+record(seq,     "$(S1){$(D1)}State:Cl280-Cmd") {
+#
+# Sets the FF Amp expr C = 0.148 too!
+#
+  field(DO1,    "0.148")
+  field(LNK1,   "$(S1){$(D1)-$(TBL1)}E:Fb-SP PP")
+  field(DLY1,   "0")
+  field(DO2,    "100")
+  field(LNK2,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY2,   "0")
+#
+# Select FF expr = CW = 1
+#
+  field(DO3,    "1")
+  field(LNK3,   "$(S1){$(D1)-$(TBL1)}Cnt:Eq-Sel PP")
+  field(DLY3,   "5")
+  field(DO4,    "101")
+  field(LNK4,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY4,   "0")
+#
+# Expression apply!
+#
+  field(DO5,    "1")
+  field(LNK5,   "$(S1){$(D1)-$(TBL1)}Cmd:Apply PP")
+  field(DLY5,   "1")
+  field(DO6,    "102")
+  field(LNK6,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY6,   "0")
+  field(FLNK,   "$(S1){$(D1)}State:Cl290-Cmd")
+}
+
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#=========================================================================================
+
+#
+# Copies the C+L to the FB waveform
+#
+record(acalcout, "$(S1){$(D1)}State:Cl290-Cmd") {
+  field(DESC,   "Waveform copy:")
+  field(CALC,   "AA")
+  field(INAA,   "$(S1){$(D1)}Phs:StrRef-SP")
+  field(NELM,   "128")
+  field(OUT,    "$(S1){$(D1)-$(TBL2)}Phs:Eq2 PP")
+  field(FLNK,   "$(S1){$(D1)}State:Cl300-Cmd")
+}
+
+record(seq,     "$(S1){$(D1)}State:Cl300-Cmd") {
+  field(DO1,    "103")
+  field(LNK1,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY1,   "0")
+#
+# Sets the FB amplitude setpoint to a small value, 0.01
+# Since we start off from FF with value 0.148
+# we should apply 0.148(!)
+#
+  field(DO2,    "0.148")
+  field(LNK2,   "$(S1){$(D1)}E:Fb-SP PP")
+  field(DLY2,   "5")
+  field(DO3,    "104")
+  field(LNK3,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY3,   "0")
+#
+# Sets the FB phase setpoint to a small value, 1.0
+#
+  field(DO4,    "1.0")
+  field(LNK4,   "$(S1){$(D1)}Phs:Fb-SP PP")
+  field(DLY4,   "2")
+  field(DO5,    "105")
+  field(LNK5,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY5,   "0")
+#
+# Copies the string "C" to the FB CW equation
+#
+  field(DO6,    "67")
+  field(LNK6,   "$(S1){$(D1)-$(TBL2)}E:Eq2 PP")
+  field(DLY6,   "5")
+  field(DO7,    "106")
+  field(LNK7,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY7,   "0")
+#
+# Sets the FB phase variable "L" (W) to "closed_loop"
+#
+  field(DO8,    "1")
+  field(LNK8,   "$(S1){$(D1)-$(TBL2)}Val:W.OMSL PP")
+  field(DLY8,   "1")
+  field(DO9,    "107")
+  field(LNK9,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY9,   "0")
+  field(FLNK,   "$(S1){$(D1)}State:Cl310-Cmd PP")
+}
+
+record(seq,     "$(S1){$(D1)}State:Cl310-Cmd") {
+#
+# Sets the FB expression selector to CW
+# 
+  field(DO1,    "1")
+  field(LNK1,   "$(S1){$(D1)-$(TBL2)}Cnt:Eq-Sel PP")
+  field(DLY1,   "1")
+  field(DO2,    "108")
+  field(LNK2,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY2,   "0")
+#
+# Sets the FB amplitude variable C to "closed_loop"
+#
+  field(DO3,    "1")
+  field(LNK3,   "$(S1){$(D1)-$(TBL2)}Val:C.OMSL PP")
+  field(DLY3,   "1")
+  field(DO4,    "109")
+  field(LNK4,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY4,   "0")
+#
+# Sets the FB phase variable "C" (M) to "closed_loop"
+#
+  field(DO5,    "1")
+  field(LNK5,   "$(S1){$(D1)-$(TBL2)}Val:M.OMSL PP")
+  field(DLY5,   "1")
+  field(DO6,    "110")
+  field(LNK6,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY6,   "0")
+#
+# Applies the CW settings for FB
+#
+  field(DO7,    "1")
+  field(LNK7,   "$(S1){$(D1)-$(TBL2)}Cmd:Apply PP")
+  field(DLY7,   "3")
+  field(DO8,    "111")
+  field(LNK8,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY8,   "0")
+#
+# Sets the FB amplitude to 0.148
+# 
+  field(DO9,    "0.148")
+  field(LNK9,   "$(S1){$(D1)}E:Fb-SP PP")
+  field(DLY9,   "5")
+  field(FLNK,   "$(S1){$(D1)}State:Cl320-Cmd PP")
+}
+
+record(seq,     "$(S1){$(D1)}State:Cl320-Cmd") {
+  field(DO1,    "112")
+  field(LNK1,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY1,   "0")
+#
+# Sets the FB phase to 0
+#
+  field(DO2,    "0")
+  field(LNK2,   "$(S1){$(D1)}Phs:Fb-SP PP")
+  field(DLY2,   "3")
+  field(DO3,    "113")
+  field(LNK3,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY3,   "0")
+#
+# Applies the settings
+# 
+  field(DO4,    "1")
+  field(LNK4,   "$(S1){$(D1)-$(TBL2)}Cmd:Apply PP")
+  field(DLY4,   "3")
+  field(DO5,    "114")
+  field(LNK5,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY5,   "0")
+#
+# Sets the proportional gain to 0.05
+#
+  field(DO6,    "0.05")
+  field(LNK6,   "$(S1){$(D1)}Gain:P-SP PP")
+  field(DLY6,   "5")
+  field(DO7,    "115")
+  field(LNK7,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY7,   "0")
+#
+# Sets the integral gain to 0.05
+# 
+  field(DO8,    "0.05")
+  field(LNK8,   "$(S1){$(D1)}Gain:I-SP PP")
+  field(DLY8,   "3")
+  field(DO9,    "116")
+  field(LNK9,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY9,   "0")
+  field(FLNK,   "$(S1){$(D1)}State:Cl330-Cmd PP")
+}
+
+record(seq,     "$(S1){$(D1)}State:Cl330-Cmd") {
+#
+# Enables FF once more!
+#
+  field(DO1,    "1")
+  field(LNK1,   "$(S1){$(D1)-$(TBL1)}Enbl:Cmd PP")
+  field(DLY1,   "5")
+  field(DO2,    "117")
+  field(LNK2,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY2,   "0")
+#
+# Triggers the FB ramp once
+#
+  field(DO3,    "1")
+  field(LNK3,   "$(S1){$(D1)}Trig:Ramp-Cmd PP")
+  field(DLY3,   "3")
+  field(DO4,    "118")
+  field(LNK4,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY4,   "0")
+#
+# Triggers the FB ramp once more!
+#
+  field(DO5,    "1")
+  field(LNK5,   "$(S1){$(D1)}Trig:Ramp-Cmd CPP")
+  field(DLY5,   "3")
+  field(DO6,    "119")
+  field(LNK6,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY6,   "0")
+#
+# Sets the FF amplitude setpoint to 0.148
+#
+  field(DO7,    "0.148")
+  field(LNK7,   "$(S1){$(D1)-$(TBL1)}E:Fb-SP PP")
+  field(DLY7,   "2")
+  field(DO8,    "120")
+  field(LNK8,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY8,   "0")
+#
+# And triggers the ramp for the third time!
+#
+  field(DO9,    "1")
+  field(LNK9,   "$(S1){$(D1)}Trig:Ramp-Cmd PP")
+  field(DLY9,   "3")
+  field(FLNK,   "$(S1){$(D1)}State:Cl360-Cmd PP")
+}
+
+#************************************************
+# DEC. 18, 2019: We use the Circular Buffer Re-Arming
+# sequence from file okCircBuf.db and wait until the
+# progress indicator = 5. Need CALC for Mask
+#======================================================================
+#**********************************************************************
+record(seq,     "$(S1){$(D1)}State:Cl360-Cmd") {
+  field(DO1,    "1")
+  field(LNK1,   "$(S1){$(D1)}Val:Cl360Msk")
+  field(DO2,    "1")
+  field(LNK2,   "$(S1){$(D1)-$(SD6)}State:Prog-Sts PP")
+  field(DO3,    "1")
+  field(DLY3,   "1")
+  field(LNK3,   "$(S1){$(D1)-$(SD6)}State:Arm00 PP")
+  field(FLNK,   "$(S1){$(D1)}Val:Cl360Msk-Calc")
+}
+
+record(calcout, "$(S1){$(D1)}Val:Cl360Msk-Calc") {
+  field(CALC,   "(A<1)?2:1")
+  field(INPA,   "$(S1){$(D1)-$(SD6)}State:Prog-Sts")
+  field(OUT,    "$(S1){$(D1)}Val:Cl360Msk PP")
+  field(ODLY,   "0.1")
+# field(TPRO,   "1")
+}
+
+record(longout, "$(S1){$(D1)}Val:Cl360Msk") {
+  field(FLNK,   "$(S1){$(D1)}State:Cl365-Cmd")
+# field(TPRO,   "1")
+}
+
+record(seq,     "$(S1){$(D1)}State:Cl365-Cmd") {
+  field(SELM,   "Mask")
+  field(SELL,   "$(S1){$(D1)}Val:Cl360Msk")
+  field(DO1,    "1")
+  field(LNK1,   "$(S1){$(D1)}Val:Cl360Msk-Calc.PROC PP")
+  field(DLY1,   "1")
+  field(DO2,    "1")
+  field(LNK2,   "$(S1){$(D1)}State:Cl380-Cmd.PROC PP")
+}
+
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#================================================
+#================================================
+#************************************************
+#================================================
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+record(seq,     "$(S1){$(D1)}State:Cl380-Cmd") {
+  field(DO1,    "121")
+  field(LNK1,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY1,   "0")
+#
+# Sets the phase rotation
+#
+  field(DO2,    "1")
+  field(LNK2,   "$(S1){$(D1)}AutoPhase-Cmd PP")
+  field(DLY2,   "5")
+  field(DO3,    "122")
+  field(LNK3,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY3,   "0")
+#
+# Activates -autoset command!
+#
+  field(DO4,    "1")
+  field(LNK4,   "$(S1){$(D1)}AutoSP-Cmd PP")
+  field(DLY4,   "2")
+  field(DO5,    "123")
+  field(LNK5,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY5,   "0")
+#
+# Closes the loop!
+#
+  field(DO6,    "1")
+  field(LNK6,   "$(S1){$(D1)-$(TBL2)}Enbl:Cmd PP")
+  field(DLY6,   "2")
+  field(DO7,    "124")
+  field(LNK7,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY7,   "0")
+#
+# Disables FF
+#
+  field(DO8,    "0")
+  field(LNK8,   "$(S1){$(D1)-$(TBL1)}Enbl:Cmd PP")
+  field(DLY8,   "2")
+  field(DO9,    "125")
+  field(LNK9,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY9,   "2")
+  field(LNKA,   "$(S1){$(D1)}State:Cl390-Cmd PP")
+}
+
+record(seq,     "$(S1){$(D1)}State:Cl390-Cmd") {
+#
+# Disables FF once more
+#
+  field(DO1,    "0")
+  field(LNK1,   "$(S1){$(D1)-$(TBL1)}Enbl:Cmd CPP")
+  field(DLY1,   "1")
+  field(DO2,    "126")
+  field(LNK2,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY2,   "0")
+#
+# Sets the amplitude setpoint to 0.148
+#
+  field(DO3,    "0.148")
+  field(LNK3,   "$(S1){$(D1)}E:Fb-SP PP")
+  field(DLY3,   "2")
+  field(DO4,    "127")
+  field(LNK4,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY4,   "0")
+  field(DO5,    "128")
+  field(LNK5,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY5,   "0")
+#
+# Sets the expression selector to booster ramp
+#
+  field(DO6,    "0")
+  field(LNK6,   "$(S1){$(D1)-$(TBL2)}Cnt:Eq-Sel PP")
+  field(DLY6,   "2")
+  field(DO7,    "129")
+  field(LNK7,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY7,   "0")
+#
+# Applies the settings
+#
+  field(DO8,    "1")
+  field(LNK8,   "$(S1){$(D1)-$(TBL2)}Cmd:Apply PP")
+  field(DLY8,   "2")
+  field(FLNK,   "$(S1){$(D1)}State:Cl400-Cmd PP")
+}
+
+record(seq,     "$(S1){$(D1)}State:Cl400-Cmd") {
+  field(DO1,    "130")
+  field(LNK1,   "$(S1){$(D1)}State:Prog-Sts CPP")
+  field(DLY1,   "0")
+#
+# Disables the ADC acquisition trigger
+#
+  field(DO2,    "0")
+  field(LNK2,   "$(S1){$(D1)}Enbl:ADC PP")
+  field(DLY2,   "1")
+  field(DO3,    "131")
+  field(LNK3,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY3,   "0")
+#
+# Applies the booster ramp waveform
+#
+  field(DO4,    "1")
+  field(LNK4,   "$(S1){$(D1)-$(TBL2)}Cmd:Apply PP")
+  field(DLY4,   "1")
+  field(DO5,    "132")
+  field(LNK5,   "$(S1){$(D1)}State:Prog-Sts PP")
+  field(DLY5,   "0")
+# Enables the external trigger
+  field(DO6,    "1")
+#
+# Don't do it for the test stand in the RF cage!
+#
+# field(LNK6,   "$(S1){$(D1)-$(D2)}Val:Dummy-SP")
+#
+# field(LNK6,   "BR-TS{EVR:L1A}Ena-Sel CPP")
+# 
+# Use BR-TS{EVR:L1A-Out:FP1}Ena-SP instead
+  field(LNK6,   "BR-TS{EVR:L1A-Out:FP0}Ena-SP CPP")
+# field(LNK6,   "RF-TST{EVR:PMC-Out:FP0}Ena-SP CPP")
+  field(DLY6,   "2")
+  field(FLNK,   "$(S1){$(D1)}State:Cl970-Clc")
+}
+
+#
+# Progress indicator
+#
+record(ao,      "$(S1){$(D1)}State:Prog-Sts") {
+  field(DESC,   "Closing the loop:")
+  field(LOPR,   "0")
+  field(HOPR,   "132")
+  field(PINI,   "YES")
+}
+
+record(seq,     "$(S1){$(D1)}State:Cl970-Clc") {
+  field(DO1,    "0")
+  field(LNK1,   "$(S1){$(D1)}State:Cl000-Sts PP")
+  field(DO2,    "0")
+#
+# Releases the sequence re-trigger lock
+#
+  field(LNK2,   "$(S1){$(D1)}State:Cl000-Sts.DISA PP")
+  field(DLY2,   "1")
+#
+# Resets the busy bit
+#
+  field(DO1,    "0")
+  field(LNK3,   "$(S1){$(D1)}State:Cl000-Sts PP")
+  field(DLY3,   "1")
+  field(DO4,    "0")
+  field(LNK4,   "$(S1){$(D1)}State:Prog-Sts PP")
+}

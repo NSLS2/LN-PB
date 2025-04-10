@@ -1,0 +1,9 @@
+# autosave R5.3	Automatically generated - DO NOT MODIFY - 250312-102728
+LN-RF{CFC:PB}Time:Dly-SP.VAL 0.01
+LN-RF{CFC:PB}Gain:I-SP.VAL 0.1
+LN-RF{CFC:PB}Gain:P-SP.VAL 0.1
+LN-RF{CFC:PB}Phs:Loop-SP.VAL 0
+LN-RF{CFC:PB-FF}Enbl:Cmd.VAL 1
+LN-RF{CFC:PB-FB}Enbl:Cmd.VAL 0
+RF-CT{iocln-pb}:ACCESS.VAL 0
+<END>

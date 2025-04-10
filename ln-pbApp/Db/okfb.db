@@ -1,0 +1,606 @@
+#
+# $(TBL) waveform
+#
+# P - Record name prefix
+# PORT - asyn port name
+#
+# External Records
+# Inputs:
+#  $(P)T:DAC-I - from okllrf.db
+
+
+record(ao, "$(P)$(TBL):AmpCtrl-SP") {
+  field(DESC, "$(TBL): setpoint Amp")
+  field(PREC, "3")
+  field(DRVH, "1")
+  field(DRVL, "0")
+  field(HOPR, "1")
+  field(LOPR, "0")
+  field(IVOA, "Don't drive outputs")
+  field(PINI, "YES")
+  info(autosaveFields_pass0, "VAL")
+}
+
+record(ao, "$(P)$(TBL):PhaCtrl-SP") {
+  field(DESC, "$(TBL): setpoint Pha")
+  field(PREC, "3")
+  field(DRVH, "180")
+  field(DRVL, "-180")
+  field(HOPR, "180")
+  field(LOPR, "-180")
+  field(EGU , "deg")
+  field(IVOA, "Don't drive outputs")
+  field(PINI, "YES")
+  info(autosaveFields_pass0, "VAL")
+}
+
+# Calculation parameters
+record(ao, "$(P)$(TBL):ValC-SP") {
+  field(PREC, "3")
+  field(PINI, "YES")
+  field(DOL , "$(P)$(TBL):AmpCtrl-SP CPP MSS")
+  info(autosaveFields_pass0, "VAL DOL OMSL")
+}
+record(ao, "$(P)$(TBL):ValD-SP") {
+  field(PREC, "3")
+  field(PINI, "YES")
+  info(autosaveFields_pass0, "VAL DOL OMSL")
+}
+record(ao, "$(P)$(TBL):ValE-SP") {
+  field(PREC, "3")
+  field(PINI, "YES")
+  info(autosaveFields_pass0, "VAL DOL OMSL")
+}
+record(ao, "$(P)$(TBL):ValF-SP") {
+  field(PREC, "3")
+  field(PINI, "YES")
+  info(autosaveFields_pass0, "VAL DOL OMSL")
+}
+record(ao, "$(P)$(TBL):ValG-SP") {
+  field(PREC, "3")
+  field(PINI, "YES")
+  info(autosaveFields_pass0, "VAL DOL OMSL")
+}
+record(ao, "$(P)$(TBL):ValH-SP") {
+  field(PREC, "3")
+  field(PINI, "YES")
+  info(autosaveFields_pass0, "VAL DOL  OMSL")
+}
+record(ao, "$(P)$(TBL):ValI-SP") {
+  field(PREC, "3")
+  field(PINI, "YES")
+  info(autosaveFields_pass0, "VAL DOL OMSL")
+}
+record(ao, "$(P)$(TBL):ValJ-SP") {
+  field(PREC, "3")
+  field(PINI, "YES")
+  info(autosaveFields_pass0, "VAL DOL OMSL")
+}
+record(ao, "$(P)$(TBL):ValK-SP") {
+  field(PREC, "3")
+  field(PINI, "YES")
+  info(autosaveFields_pass0, "VAL DOL OMSL")
+}
+record(ao, "$(P)$(TBL):ValL-SP") {
+  field(PREC, "3")
+  field(PINI, "YES")
+  info(autosaveFields_pass0, "VAL DOL OMSL")
+}
+
+#==========================================================
+# Select between 5 expressions
+#
+
+record(bo, "$(P)$(TBL):ExprApply-Cmd") {
+ field(DESC, "Apply:")
+ field(ZNAM, "Idle")
+ field(ONAM, "Apply")
+ field(FLNK, "$(P)$(TBL):Expr-Sel")
+}
+
+record(mbbo, "$(P)$(TBL):Expr-Sel") {
+ field(DESC, "Select:")
+ field(ZRST, "Booster ramp")
+ field(ONST, "CW")
+ field(TWST, "SFunc")
+ field(THST, "Table from file")
+ field(FRST, "Test pulse")
+ field(FVST, "Test curve")
+ field(FLNK,  "$(P)$(TBL):WGen-Sel0_")
+ info(autosaveFields_pass1, "VAL")
+}
+
+record(calcout, "$(P)$(TBL):WGen-Sel0_") {
+# 3 = Table from file, don't CALC!
+ field(CALC,    "(A<3 || A>3)?1:2")
+ field(INPA,    "$(P)$(TBL):Expr-Sel")
+ field(OUT,     "$(P)$(TBL):WGen-Sel1_")
+ field(FLNK,    "$(P)$(TBL):WGen-Sel1_")
+}
+
+record(longout, "$(P)$(TBL):WGen-Sel1_") {
+ field(DESC, "Ramp wf (0 = Eq; 1 = File):" )
+ field(FLNK, "$(P)$(TBL):Expr-Fo")
+}
+
+record(fanout, "$(P)$(TBL):Expr-Fo") {
+ field(LNK1, "$(P)$(TBL):AExpr-Sel_")
+ field(LNK2, "$(P)$(TBL):PhExpr-Sel_")
+}
+
+record(waveform, "$(P)$(TBL):AExpr1") {
+ field(FTVL,"CHAR")
+ field(NELM,"128")
+ field(PINI, YES)
+ info(autosaveFields_pass1, "VAL")
+}
+
+record(waveform, "$(P)$(TBL):AExpr2") {
+ field(FTVL,"CHAR")
+ field(NELM,"128")
+ field(PINI, YES)
+ info(autosaveFields_pass1, "VAL")
+}
+
+record(waveform, "$(P)$(TBL):AExpr3") {
+ field(FTVL,"CHAR")
+ field(NELM,"128")
+ field(PINI, YES)
+ info(autosaveFields_pass1, "VAL")
+}
+
+record(waveform, "$(P)$(TBL):AExpr4") {
+ field(FTVL,"CHAR")
+ field(NELM,"128")
+ field(PINI, YES)
+ info(autosaveFields_pass1, "VAL")
+}
+
+record(waveform, "$(P)$(TBL):AExpr5") {
+ field(FTVL,"CHAR")
+ field(NELM,"128")
+ field(PINI, YES)
+ info(autosaveFields_pass1, "VAL")
+}
+
+record(waveform, "$(P)$(TBL):AFile_1") {
+ field(FTVL,"CHAR")
+ field(NELM,"128")
+ field(PINI, YES)
+ info(autosaveFields_pass1, "VAL")
+}
+
+record(aSub,  "$(P)$(TBL):AExpr-Sel_") {
+  field(SNAM, "WfSel")
+  field(FTA , "SHORT")
+  field(FTB , "CHAR")
+  field(NOB , "128")
+  field(FTC , "CHAR")
+  field(NOC , "128")
+  field(FTD , "CHAR")
+  field(NOD , "128")
+  field(FTE , "CHAR")
+  field(NOE , "128")
+  field(FTF , "CHAR")
+  field(NOF , "128")
+  field(FTVA, "CHAR")
+  field(NOVA, "128")
+  field(INPA, "$(P)$(TBL):Expr-Sel")
+  field(INPB, "$(P)$(TBL):AExpr1")
+  field(INPC, "$(P)$(TBL):AExpr2")
+  field(INPD, "$(P)$(TBL):AExpr3")
+  field(INPE, "$(P)$(TBL):AExpr4")
+  field(INPF, "$(P)$(TBL):AExpr5")
+  field(OUTA, "$(P)$(TBL):AmpExpr-SP")
+  field(FLNK, "$(P)$(TBL):AmpExpr-SP")
+}
+
+#==========================================================
+
+record(waveform, "$(P)$(TBL):PhExpr1") {
+ field(FTVL,"CHAR")
+ field(NELM,"128")
+ field(PINI, YES)
+ info(autosaveFields_pass1, "VAL")
+}
+
+record(waveform, "$(P)$(TBL):PhExpr2") {
+ field(FTVL,"CHAR")
+ field(NELM,"128")
+ field(PINI, YES)
+ info(autosaveFields_pass1, "VAL")
+}
+
+record(waveform, "$(P)$(TBL):PhExpr3") {
+ field(FTVL,"CHAR")
+ field(NELM,"128")
+ field(PINI, YES)
+ info(autosaveFields_pass1, "VAL")
+}
+
+record(waveform, "$(P)$(TBL):PhExpr4") {
+ field(FTVL,"CHAR")
+ field(NELM,"128")
+ field(PINI, YES)
+ info(autosaveFields_pass1, "VAL")
+}
+
+record(waveform, "$(P)$(TBL):PhExpr5") {
+ field(FTVL,"CHAR")
+ field(NELM,"128")
+ field(PINI, YES)
+ info(autosaveFields_pass1, "VAL")
+}
+
+record(waveform, "$(P)$(TBL):PhFile_1") {
+ field(FTVL,"CHAR")
+ field(NELM,"128")
+ field(PINI, YES)
+ info(autosaveFields_pass1, "VAL")
+}
+
+record(aSub,  "$(P)$(TBL):PhExpr-Sel_") {
+  field(SNAM, "WfSel")
+  field(FTA , "SHORT")
+  field(FTB , "CHAR")
+  field(NOB , "128")
+  field(FTC , "CHAR")
+  field(NOC , "128")
+  field(FTD , "CHAR")
+  field(NOD , "128")
+  field(FTE , "CHAR")
+  field(NOE , "128")
+  field(FTF , "CHAR")
+  field(NOF , "128")
+  field(FTVA, "CHAR")
+  field(NOVA, "128")
+  field(INPA, "$(P)$(TBL):Expr-Sel")
+  field(INPB, "$(P)$(TBL):PhExpr1")
+  field(INPC, "$(P)$(TBL):PhExpr2")
+  field(INPD, "$(P)$(TBL):PhExpr3")
+  field(INPE, "$(P)$(TBL):PhExpr4")
+  field(INPF, "$(P)$(TBL):PhExpr5")
+  field(OUTA, "$(P)$(TBL):PhaExpr-SP")
+  field(FLNK, "$(P)$(TBL):PhaExpr-SP")
+}
+
+#==========================================================
+
+# Expression for element wise
+# calculation of Amplitude and phase waveforms
+
+record(waveform, "$(P)$(TBL):AmpExpr-SP") {
+ field(FTVL,"CHAR")
+ field(NELM,"128")
+ field(FLNK, "$(P)$(TBL):AExPr-Sel3_")
+ field(PINI, YES)
+ info(autosaveFields_pass1, "VAL")
+}
+
+record(seq, "$(P)$(TBL):AExPr-Sel3_") {
+ field(SELM, "Mask")
+ field(SELL, "$(P)$(TBL):WGen-Sel1_")
+ field(DO1,  "1")
+ field(DO2,  "1")
+ field(LNK1, "$(P)$(TBL):AmpExpr-Calc_.PROC")
+ field(LNK2, "$(P)$(TBL):AmpExpr-Copy_.PROC")
+}
+
+# Calculate amplitude
+
+record(aSub, "$(P)$(TBL):AmpExpr-Calc_") {
+ field(INAM, "WG Init")
+ field(SNAM, "WG Gen")
+ field(FTA , "CHAR")
+ field(NOA , "128")
+ field(FTB , "DOUBLE")
+ field(NOB , "512")
+ field(FTC , "DOUBLE")
+ field(FTD , "DOUBLE")
+ field(FTE , "DOUBLE")
+ field(FTF , "DOUBLE")
+ field(FTG , "DOUBLE")
+ field(FTH , "DOUBLE")
+ field(FTI , "DOUBLE")
+ field(FTJ , "DOUBLE")
+ field(FTK , "DOUBLE")
+ field(FTL , "DOUBLE")
+ field(FTVA, "DOUBLE")
+ field(NOVA, "512")
+ field(INPA, "$(P)$(TBL):AmpExpr-SP NPP MSS")
+ field(INPB, "$(P)T:DAC-I CPP MSS")
+ field(INPC, "$(P)$(TBL):ValC-SP CPP MSS")
+ field(INPD, "$(P)$(TBL):ValD-SP CPP MSS")
+ field(INPE, "$(P)$(TBL):ValE-SP CPP MSS")
+ field(INPF, "$(P)$(TBL):ValF-SP CPP MSS")
+ field(INPG, "$(P)$(TBL):ValG-SP CPP MSS")
+ field(INPH, "$(P)$(TBL):ValH-SP CPP MSS")
+ field(INPI, "$(P)$(TBL):ValI-SP CPP MSS")
+ field(INPJ, "$(P)$(TBL):ValJ-SP CPP MSS")
+ field(INPK, "$(P)$(TBL):ValK-SP CPP MSS")
+ field(INPL, "$(P)$(TBL):ValL-SP CPP MSS")
+ field(OUTA, "$(P)$(TBL):Amp-SP PP MSS")
+}
+
+record(ao, "$(P)$(TBL):AmpExpr-Copy_") {
+ field(FLNK, "$(P)$(TBL):AtFileIn_") 
+}
+
+record(waveform, "$(P)$(TBL):AtFileIn_") {
+  field(DTYP, "fileread")
+  field(INP,  "@/epics/iocs/OKLLRF1/Ampl.TXT 0")
+  field(FTVL, "DOUBLE")
+  field(NELM, "1024")
+  field(FLNK, "$(P)$(TBL):AFileIn_") 
+}
+
+record(waveform, "$(P)$(TBL):AFileIn_") {
+  field(DTYP, "fileread")
+  field(INP,  "@/epics/iocs/OKLLRF1/Ampl.TXT 1")
+  field(FTVL, "DOUBLE")
+  field(NELM, "1024")
+  field(FLNK, "$(P)$(TBL):PtFileIn_") 
+}
+
+record(waveform, "$(P)$(TBL):PtFileIn_") {
+  field(DTYP, "fileread")
+  field(INP,  "@/epics/iocs/OKLLRF1/Phas.TXT 0")
+  field(FTVL, "DOUBLE")
+  field(NELM, "1024")
+  field(FLNK, "$(P)$(TBL):PFileIn_") 
+}
+
+record(waveform, "$(P)$(TBL):PFileIn_") {
+  field(DTYP, "fileread")
+  field(INP,  "@/epics/iocs/OKLLRF1/Phas.TXT 1")
+  field(FTVL, "DOUBLE")
+  field(NELM, "1024")
+  field(FLNK, "$(P)$(TBL):Ampalign_")
+}
+
+record(aSub, "$(P)$(TBL):Ampalign_") {
+ field(SNAM, "WfAlign")
+ field(FTA , "DOUBLE")
+ field(NOA , "1024")
+ field(FTB , "DOUBLE")
+ field(NOB , "1024")
+ field(FTC , "DOUBLE")
+ field(NOC , "1")
+ field(FTVA, "DOUBLE")
+ field(NOVA, "512")
+ field(INPA, "$(P)$(TBL):AtFileIn_")
+ field(INPB, "$(P)$(TBL):AFileIn_")
+ field(INPC, "$(P)$(TBL):HUnit")
+ field(OUTA, "$(P)$(TBL):Amp-SP")
+ field(FLNK, "$(P)$(TBL):Phalign_")
+}
+
+record(aSub, "$(P)$(TBL):Phalign_") {
+ field(SNAM, "WfAlign")
+ field(FTA , "DOUBLE")
+ field(NOA , "1024")
+ field(FTB , "DOUBLE")
+ field(NOB , "1024")
+ field(FTC , "DOUBLE")
+ field(NOC , "1")
+ field(FTVA, "DOUBLE")
+ field(NOVA, "512")
+ field(INPA, "$(P)$(TBL):PtFileIn_")
+ field(INPB, "$(P)$(TBL):PFileIn_")
+ field(INPC, "$(P)$(TBL):HUnit")
+ field(OUTA, "$(P)$(TBL):Pha-SP")
+ field(FLNK, "$(P)$(TBL):Amp-SP")
+}
+
+#--------------------------------------------------------------------
+#--------------------------------------------------------------------
+record(waveform, "$(P)$(TBL):Amp-SP") {
+  field(FTVL, "DOUBLE")
+  field(NELM, "512")
+  field(FLNK, "$(P)$(TBL):IQ-Calc_")
+}
+
+# Calculate phase
+# Calculation parameters
+
+record(ao, "$(P)$(TBL):ValM-SP") {
+  field(PREC, "3")
+  field(PINI, "YES")
+  field(DOL , "$(P)$(TBL):PhaCtrl-SP CPP MSS")
+  info(autosaveFields_pass0, "VAL DOL OMSL")
+}
+record(ao, "$(P)$(TBL):ValN-SP") {
+  field(PREC, "3")
+  field(PINI, "YES")
+  info(autosaveFields_pass0, "VAL DOL OMSL")
+}
+record(ao, "$(P)$(TBL):ValO-SP") {
+  field(PREC, "3")
+  field(PINI, "YES")
+  info(autosaveFields_pass0, "VAL DOL OMSL")
+}
+record(ao, "$(P)$(TBL):ValP-SP") {
+  field(PREC, "3")
+  field(PINI, "YES")
+  info(autosaveFields_pass0, "VAL DOL OMSL")
+}
+record(ao, "$(P)$(TBL):ValR-SP") {
+  field(PREC, "3")
+  field(PINI, "YES")
+  info(autosaveFields_pass0, "VAL DOL OMSL")
+}
+record(ao, "$(P)$(TBL):ValS-SP") {
+  field(PREC, "3")
+  field(PINI, "YES")
+  info(autosaveFields_pass0, "VAL DOL  OMSL")
+}
+record(ao, "$(P)$(TBL):ValT-SP") {
+  field(PREC, "3")
+  field(PINI, "YES")
+  info(autosaveFields_pass0, "VAL DOL OMSL")
+}
+record(ao, "$(P)$(TBL):ValU-SP") {
+  field(PREC, "3")
+  field(PINI, "YES")
+  info(autosaveFields_pass0, "VAL DOL OMSL")
+}
+record(ao, "$(P)$(TBL):ValV-SP") {
+  field(PREC, "3")
+  field(PINI, "YES")
+  info(autosaveFields_pass0, "VAL DOL OMSL")
+}
+record(ao, "$(P)$(TBL):ValW-SP") {
+  field(PREC, "3")
+  field(PINI, "YES")
+  info(autosaveFields_pass0, "VAL DOL OMSL")
+}
+
+# Expression for element wise
+# calculation of Amplitude and phase waveforms
+
+record(waveform, "$(P)$(TBL):PhaExpr-SP") {
+ field(FTVL,"CHAR")
+ field(NELM,"128")
+ field(FLNK, "$(P)$(TBL):PhaExpr-Calc_")
+ field(PINI, YES)
+ info(autosaveFields_pass1, "VAL")
+}
+
+record(aSub, "$(P)$(TBL):PhaExpr-Calc_") {
+ field(INAM, "WG Init")
+ field(SNAM, "WG Gen")
+ field(FTA , "CHAR")
+ field(NOA , "128")
+ field(FTB , "DOUBLE")
+ field(NOB , "512")
+ field(FTC , "DOUBLE")
+ field(FTD , "DOUBLE")
+ field(FTE , "DOUBLE")
+ field(FTF , "DOUBLE")
+ field(FTG , "DOUBLE")
+ field(FTH , "DOUBLE")
+ field(FTI , "DOUBLE")
+ field(FTJ , "DOUBLE")
+ field(FTK , "DOUBLE")
+ field(FTL , "DOUBLE")
+ field(FTVA, "DOUBLE")
+ field(NOVA, "512")
+ field(INPA, "$(P)$(TBL):PhaExpr-SP NPP MSS")
+ field(INPB, "$(P)T:DAC-I CPP MSS")
+ field(INPC, "$(P)$(TBL):ValM-SP CPP MSS")
+ field(INPD, "$(P)$(TBL):ValN-SP CPP MSS")
+ field(INPE, "$(P)$(TBL):ValO-SP CPP MSS")
+ field(INPF, "$(P)$(TBL):ValP-SP CPP MSS")
+ field(INPG, "$(P)$(TBL):ValR-SP CPP MSS")
+ field(INPH, "$(P)$(TBL):ValS-SP CPP MSS")
+ field(INPI, "$(P)$(TBL):ValT-SP CPP MSS")
+ field(INPJ, "$(P)$(TBL):ValU-SP CPP MSS")
+ field(INPK, "$(P)$(TBL):ValV-SP CPP MSS")
+ field(INPL, "$(P)$(TBL):ValW-SP CPP MSS")
+ field(OUTA, "$(P)$(TBL):Pha-SP PP MSS")
+}
+
+record(waveform, "$(P)$(TBL):Pha-SP") {
+  field(FTVL, "DOUBLE")
+  field(NELM, "512")
+  field(FLNK, "$(P)$(TBL):IQ-Calc_")
+}
+
+# amplitude/phase -> I/Q
+
+record(aSub, "$(P)$(TBL):IQ-Calc_") {
+  field(SNAM, "AP2IQ")
+  field(FTA , "DOUBLE")
+  field(FTB , "DOUBLE")
+  field(FTVA ,"DOUBLE")
+  field(FTVB ,"DOUBLE")
+  field(NOA , "512")
+  field(NOB , "512")
+  field(NOVA, "512")
+  field(NOVB, "512")
+  field(INPA, "$(P)$(TBL):Amp-SP MSS")
+  field(INPB, "$(P)$(TBL):Pha-SP MSS")
+  field(OUTA, "$(P)$(TBL):I-SP PP MSS")
+  field(OUTB, "$(P)$(TBL):Q-SP PP MSS")
+  field(FLNK, "$(P)$(TBL):I-SP")
+}
+
+record(bo, "$(P)$(TBL):Reshape-Ena") {
+  field(ZNAM, "Reshape disabled")
+  field(ONAM, "Reshape enabled")
+  field(VAL,  "0")
+  field(PINI, "YES")
+  info(autosaveFields_pass1, "VAL")
+}
+
+# I/Q to hardware
+
+record(waveform, "$(P)$(TBL):I-SP") {
+#  Don't output here, output both from IQ
+  field(PINI, "YES")
+  field(FTVL, "DOUBLE")
+  field(NELM, "512")
+  field(FLNK, "$(P)$(TBL):Q-SP")
+}
+
+record(waveform, "$(P)$(TBL):Q-SP") {
+#  Don't output here, output both from IQ
+  field(PINI, "YES")
+  field(FTVL, "DOUBLE")
+  field(NELM, "512")
+  field(FLNK, "$(P)$(TBL):SFunc")
+}
+
+record(aSub,  "$(P)$(TBL):SFunc") {
+  field(SNAM, "fbRampSegment")
+  field(FTA , "DOUBLE")
+  field(FTB , "DOUBLE")
+  field(FTC , "CHAR")
+# D - SP:Amp-SP.VAL
+# E - SP:Amp-SP.PVAL
+# F - SP:Pha-SP.VAL
+# G - SP:Pha-SP.PVAL
+  field(FTD,  "DOUBLE")
+  field(FTE,  "DOUBLE")
+  field(FTF,  "DOUBLE")
+  field(FTG,  "DOUBLE")
+  field(FTVA ,"DOUBLE")
+  field(NOA , "512")
+  field(NOB , "512")
+  field(NOC , "1")
+  field(NOD , "1")
+  field(NOE , "1")
+  field(NOF , "1")
+  field(NOG , "1")
+  field(NOVA, "1024")
+  field(INPA, "$(P)$(TBL):I-SP")
+  field(INPB, "$(P)$(TBL):Q-SP")
+  field(INPC, "$(P)$(TBL):Reshape-Ena")
+  field(INPD, "$(P)$(TBL):AmpCtrl-SP")
+  field(INPE, "$(P)$(TBL):Amp-SP-PVAL")
+  field(INPF, "$(P)$(TBL):PhaCtrl-SP")
+  field(INPG, "$(P)$(TBL):Pha-SP-PVAL")
+  field(OUTA, "$(P)$(TBL):IQ")
+  field(FLNK, "$(P)$(TBL):IQ")
+}
+
+record(waveform, "$(P)$(TBL):IQ") {
+  field(DTYP, "asynFloat64ArrayOut")
+  field(INP , "@asyn($(PORT),0)$(TBL) IQ")
+  field(FTVL, "DOUBLE")
+  field(NELM, "1024")
+  field(FLNK, "$(P)$(TBL):Amp-SP-PVAL")
+}
+
+record(calcout, "$(P)$(TBL):Amp-SP-PVAL") {
+  field(CALC, "A")
+  field(INPA, "$(P)$(TBL):Amp-SP")
+  field(FLNK, "$(P)$(TBL):Pha-SP-PVAL")
+}
+
+record(calcout, "$(P)$(TBL):Pha-SP-PVAL") {
+  field(CALC, "A")
+  field(INPA, "$(P)$(TBL):Pha-SP")
+}
+
+

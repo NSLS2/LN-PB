@@ -1,0 +1,713 @@
+#
+# Main
+#
+# P - Record name prefix
+# PORT - asyn port name
+#
+
+record(ai,       "$(S1){$(D1)}Freq:I") {
+  field(DESC,    "MO freq:")
+  field(VAL,     "499.68E+06")
+  field(PINI,    "YES")
+  field(EGU,     "Hz")
+  field(PREC,    "3")
+  field(SCAN,    "2 second")
+  field(INP,     "$(S2){$(D3)}Freq:I CA")
+  field(FLNK,    "$(S1){$(D1)}Time:Clk")
+}
+
+record(ai,       "$(S1){$(D1)}Val:ScaleDAC") {
+  field(DESC,    "Rf clk scaler:")
+  field(VAL,     "12.5")
+  field(PINI,    "YES")
+}
+
+record(ai,       "$(S1){$(D1)}Cnt:ScaleDAC") {
+  field(DESC,    "DAC clk scaler:")
+  field(VAL,     "16")
+  field(PINI,    "YES")
+  field(EGU,     "counts")
+  field(FLNK,    "$(S1){$(D1)}Time:ClkDAC")
+}
+
+record(calcout,  "$(S1){$(D1)}Time:ClkDAC") {
+  field(DESC,    "DAC clk period:")
+  field(CALC,    "(A/B)*C*D")
+  field(INPA,    "$(S1){$(D1)}Val:ScaleDAC")
+  field(INPB,    "$(S1){$(D1)}Freq:I")
+  field(INPC,    "$(S1){$(D1)}Cnt:ScaleDAC")
+  field(INPD,    "1.0")
+  field(EGU,     "s")
+#
+# For FF HUnit only! FB HUnit will be calculated
+# from "FB ramp interval between waypoints (in 16 clock cycles)"
+# file okWireInRB.db: WireIn, readback of EndPoint 0x0b = 11
+#
+  field(OUT,     "$(S1){$(D1)-$(TBL1)}Time:Unit PP")
+}
+
+record(ao,       "$(S1){$(D1)-$(TBL1)}Time:Unit") {
+  field(DESC,    "FF hor unit[s]:")
+  field(EGU,     "s")
+}
+
+record(ao,       "$(S1){$(D1)-$(SD2)}E:Scale-SP") {
+  field(DESC,    "Cavity voltage per 100% DAC:")
+  field(VAL,     "1918332.609")
+  field(EGU,     "V")
+  field(PREC,    "3")
+  field(PINI,    "YES")
+  info(autosaveFields_pass1, "VAL")
+  field(FLNK,    "$(S1){$(D1)-$(SD2)}E:Scl-Clc")
+}
+
+record(ao,       "$(S1){$(D1)-Drv}E:Scale-SP") {
+  field(VAL,     "1918332.609")
+  field(EGU,     "V")
+  field(PREC,    "3")
+  field(PINI,    "YES")
+  info(autosaveFields_pass1, "VAL")
+}
+
+record(ao,       "$(S1){$(D1)-Fwd}E:Scale-SP") {
+  field(VAL,     "1918332.609")
+  field(EGU,     "V")
+  field(PREC,    "3")
+  field(PINI,    "YES")
+  info(autosaveFields_pass1, "VAL")
+}
+
+record(ao,       "$(S1){$(D1)-Rfl}E:Scale-SP") {
+  field(VAL,     "1918332.609")
+  field(EGU,     "V")
+  field(PREC,    "3")
+  field(PINI,    "YES")
+  info(autosaveFields_pass1, "VAL")
+}
+
+record(ao,       "$(S1){$(D1)-Ref}E:Scale-SP") {
+  field(VAL,     "1918332.609")
+  field(EGU,     "V")
+  field(PREC,    "3")
+  field(PINI,    "YES")
+  info(autosaveFields_pass1, "VAL")
+}
+
+record(ao,       "$(S1){$(D1)-s1b}E:Scale-SP") {
+  field(VAL,     "1918332.609")
+  field(EGU,     "V")
+  field(PREC,    "3")
+  field(PINI,    "YES")
+  info(autosaveFields_pass1, "VAL")
+}
+
+record(ao,       "$(S1){$(D1)-s2b}E:Scale-SP") {
+  field(VAL,     "1918332.609")
+  field(EGU,     "V")
+  field(PREC,    "3")
+  field(PINI,    "YES")
+  info(autosaveFields_pass1, "VAL")
+}
+
+record(ao,       "$(S1){$(D1)-s3b}E:Scale-SP") {
+  field(VAL,     "1918332.609")
+  field(EGU,     "V")
+  field(PREC,    "3")
+  field(PINI,    "YES")
+  info(autosaveFields_pass1, "VAL")
+}
+
+record(calc,     "$(S1){$(D1)-$(SD2)}E:Scl-Clc") {
+  field(DESC,    "Cav kV/DAC value:")
+  field(CALC,    "A/B")
+  field(INPA,    "$(S1){$(D1)-$(SD2)}E:Scale-SP")
+  field(INPB,    "1000.0")
+  field(PREC,    "1")
+  field(EGU,     "kV")
+  field(FLNK,    "$(S1){$(D1)-$(SD2)}Val:Scl-Clc")
+}
+
+record(calc,     "$(S1){$(D1)-$(SD2)}Val:Scl-Clc") {
+  field(DESC,    "Cav DAC value/kV:")
+  field(CALC,    "A*B/C")
+  field(INPA,    "1.0")
+  field(INPB,    "1000.0")
+  field(INPC,    "$(S1){$(D1)-$(SD2)}E:Scale-SP")
+  field(PREC,    "6")
+}
+
+record(waveform, "$(S1){$(D1)}Note:Study-SP") {
+  field(DESC,    "Study in progress")
+  field(FTVL,    "CHAR")
+  field(NELM,    "120")
+  field(PINI,    "YES")
+  info(autosaveFields_pass1, "VAL")
+}
+
+record(waveform, "$(S1){$(D1)}Note:Op-SP") {
+  field(DESC,    "Operator contact info")
+  field(FTVL,    "CHAR")
+  field(NELM,    "120")
+  field(PINI,    "YES")
+  info(autosaveFields_pass1, "VAL")
+}
+
+# Initialization of all records reading/writing
+# to hardware
+record(bo,       "$(S1){$(D1)}Cmd:Init") {
+  field(ZNAM,    "Init")
+  field(ONAM,    "Init")
+  field(FLNK,    "$(S1){$(D1)}Cmd:Ini1-FOut")
+}
+
+record(fanout,   "$(S1){$(D1)}Cmd:Ini1-FOut") {
+  field(PINI,    "YES")
+  field(LNK1,    "$(S1){$(D1)}ID:Model")
+  field(LNK2,    "$(S1){$(D1)}Val:Zoom-Sel")
+  field(LNK3,    "$(S1){$(D1)}Time:Dly-SP")
+  field(LNK4,    "$(S1){$(D1)-$(TBL2)}Enbl:Cmd")
+  field(LNK5,    "$(S1){$(D1)}Gain:I-SP")
+  field(FLNK,    "$(S1){$(D1)}Cmd:Ini2-FOut")
+}
+
+record(fanout,   "$(S1){$(D1)}Cmd:Ini2-FOut") {
+  field(LNK1,    "$(S1){$(D1)}Gain:P-SP")
+  field(LNK2,    "$(S1){$(D1)}Phs:Loop-SP")
+  field(LNK3,    "$(S1){$(D1)}SP:I-SP")
+  field(LNK4,    "$(S1){$(D1)}SP:Q-SP")
+  field(LNK5,    "$(S1){$(D1)-$(TBL1)}Val:ITbl-SP")
+  field(LNK6,    "$(S1){$(D1)-$(TBL1)}Val:QTbl-SP")
+  field(FLNK,    "$(S1){$(D1)}Cmd:Ini3-FOut")
+}
+
+record(fanout,   "$(S1){$(D1)}Cmd:Ini3-FOut") {
+  field(LNK1,    "$(S1){$(D1)}T:DAC-I")
+  field(LNK2,    "$(S1){$(D1)-$(TBL1)}Mode:SP")
+  field(FLNK,    "$(S1){$(D1)}Cmd:Ini4")
+}
+
+record(calcout,  "$(S1){$(D1)}Cmd:Ini4") {
+  field(CALC,    "A")
+  field(INPA,    "1")
+  field(OUT,     "$(S1){$(D1)}Sts:Init PP")
+}
+
+record(bo,       "$(S1){$(D1)}Sts:Init") {
+  field(ZNAM,    "Idle")
+  field(ONAM,    "Init")
+  field(HIGH,    "5.0")
+}
+
+record(stringin, "$(S1){$(D1)}ID:Model") {
+  field(DTYP,    "asynOctetRead")
+  field(INP ,    "@asyn($(PORT),0)Model")
+  field(FLNK,    "$(S1){$(D1)}ID:ID")
+}
+
+record(stringin, "$(S1){$(D1)}ID:ID") {
+  field(DTYP,    "asynOctetRead")
+  field(INP ,    "@asyn($(PORT),0)ID")
+  field(FLNK,    "$(S1){$(D1)}ID:Serial")
+}
+
+record(stringin, "$(S1){$(D1)}ID:Serial") {
+  field(DESC,    "USB Serial#")
+  field(DTYP,    "asynOctetRead")
+  field(INP ,    "@asyn($(PORT),0)Serial")
+  field(FLNK,    "$(S1){$(D1)}ID:FWMajor")
+}
+
+record(longin,   "$(S1){$(D1)}ID:FWMajor") {
+  field(DTYP,    "asynInt32")
+  field(INP ,    "@asyn($(PORT),0)Major")
+  field(FLNK,    "$(S1){$(D1)}ID:FWMinor")
+}
+
+record(longin,   "$(S1){$(D1)}ID:FWMinor") {
+  field(DTYP,    "asynInt32")
+  field(INP ,    "@asyn($(PORT),0)Minor")
+}
+
+record(stringout,"$(S1){$(D1)}Val:BitDir-SP") {
+  field(DTYP,    "asynOctetWrite")
+  field(VAL,     "/bitfiles")
+  field(OUT ,    "@asyn($(PORT),0)Bit Directory")
+  field(PINI,    "YES")
+  info(autosaveFields_pass0, "VAL")
+}
+
+record(stringout,"$(S1){$(D1)}Val:BitFile-SP") {
+  field(DTYP,    "asynOctetWrite")
+  field(VAL,     "llrf_xem7_BR_Rev2.bit")
+  field(OUT ,    "@asyn($(PORT),0)Bit File")
+  field(PINI,    "YES")
+  info(autosaveFields_pass0, "VAL")
+}
+
+record(stringin, "$(S1){$(D1)}ID:okSN-I") {
+  field(DTYP,    "asynOctetRead")
+  field(SCAN,    "10 second")
+  field(INP,     "@asyn($(PORT),0)okSNo")
+}
+
+record(bo,       "$(S1){$(D1)}Rst-Cmd") {
+  field(DTYP,    "asynInt32")
+  field(OUT ,    "@asyn($(PORT),0)Reset")
+  field(ZNAM,    "Reset")
+  field(ONAM,    "Reset")
+  field(IVOA,    "Don't drive outputs")
+}
+
+record(bo,       "$(S1){$(D1)-$(SD6)}Rst:Cmd") {
+  field(DESC,    "SDRAM reset")
+  field(DTYP,    "asynInt32")
+  field(OUT ,    "@asyn($(PORT),0)SDRAM Reset")
+  field(ZNAM,    "Reset")
+  field(ONAM,    "Reset")
+  field(IVOA,    "Don't drive outputs")
+}
+
+record(bo,       "$(S1){$(D1)-$(SD6)}Enbl:Rst") {
+  field(DESC,    "SDRAM RST Enable")
+  field(DTYP,    "asynInt32")
+  field(OUT ,    "@asyn($(PORT),0)RAM RstEn")
+  field(ZNAM,    "Off")
+  field(ONAM,    "On")
+  field(HIGH,    "1")
+}
+
+record(bo,       "$(S1){$(D1)-$(SD6)}Enbl:Read") {
+  field(DESC,    "SDRAM read enable")
+  field(DTYP,    "asynInt32")
+  field(OUT ,    "@asyn($(PORT),0)RAM RdEn")
+  field(ZNAM,    "Disable")
+  field(ONAM,    "Enable")
+  info(autosaveFields_pass0, "VAL")
+}
+
+record(bo,       "$(S1){$(D1)-$(SD6)}Enbl:Write") {
+  field(DESC,    "SDRAM write enable")
+  field(DTYP,    "asynInt32")
+  field(OUT ,    "@asyn($(PORT),0)RAM WrEn")
+  field(ZNAM,    "Disable")
+  field(ONAM,    "Enable")
+  info(autosaveFields_pass0, "VAL")
+}
+
+record(bo,       "$(S1){$(D1)-$(SD6)}Enbl:Arm") {
+  field(DESC,    "Arm SDRAM!")
+  field(DTYP,    "asynInt32")
+  field(OUT ,    "@asyn($(PORT),0)RAM Arm")
+  field(ZNAM,    "Do nothing")
+  field(ONAM,    "Arm")
+  field(IVOA,    "Don't drive outputs")
+}
+
+record(bo,       "$(S1){$(D1)}Cmd:Update") {
+  field(DTYP,    "asynInt32")
+  field(OUT ,    "@asyn($(PORT),0)Update")
+  field(ZNAM,    "Update")
+  field(ONAM,    "Update")
+  field(FLNK,    "$(S1){$(D1)}Sts:Blink2")
+  field(IVOA,    "Don't drive outputs")
+  info(autosaveFields_pass0, "SCAN")
+}
+
+record(calc,     "$(S1){$(D1)}Sts:Blink1") {
+  field(CALC,    "A?0:1")
+  field(INPA,    "$(S1){$(D1)}Sts:Blink1")
+  field(SCAN,    ".5 second")
+}
+
+record(calc,     "$(S1){$(D1)}Sts:Blink2") {
+  field(CALC,    "A?0:1")
+  field(INPA,    "$(S1){$(D1)}Sts:Blink2")
+}
+
+record(bo,       "$(S1){$(D1)}Cmd:Load") {
+  field(DTYP,    "asynInt32")
+  field(OUT ,    "@asyn($(PORT),0)Load")
+  field(ZNAM,    "Load")
+  field(ONAM,    "Load")
+  field(IVOA,    "Don't drive outputs")
+  field(FLNK,    "$(S1){$(D1)}Cmd:Init")
+}
+
+record(bo,       "$(S1){$(D1)}Enbl:Limiter") {
+  field(DTYP,    "asynInt32")
+  field(DESC,    "Limiter:")
+  field(OUT ,    "@asyn($(PORT),0)Limiter")
+  field(ZNAM,    "Disabled")
+  field(ONAM,    "Enabled")
+  field(VAL,     "1")
+  field(PINI,    "YES")
+  field(IVOA,    "Don't drive outputs")
+  info(autosaveFields_pass1, "VAL")
+}
+
+record(bo,       "$(S1){$(D1)-$(TBL1)}Mode:SP") {
+  field(DTYP,    "asynInt32")
+  field(DESC,    "FF Dutycycle:")
+  field(OUT ,    "@asyn($(PORT),0)FF DutyCycle")
+  field(ZNAM,    "Single")
+  field(ONAM,    "Cont.")
+  field(IVOA,    "Don't drive outputs")
+  info(autosaveFields_pass0, "VAL")
+}
+
+record(mbbo,     "$(S1){$(D1)}Val:Zoom-Sel") {
+  field(DTYP,    "asynInt32")
+  field(OUT ,    "@asyn($(PORT),0)Scope Zoom")
+  field(ZRST,    "25   us")
+  field(ZRVL,    "0")
+  field(ONST,    "125  us")
+  field(ONVL,    "1")
+  field(TWST,    "102  us")
+  field(TWVL,    "2")
+  field(THST,    "1625 us  ")
+  field(THVL,    "3")
+  field(FRSV,    "INVALID")
+  field(FVSV,    "INVALID")
+  field(SXSV,    "INVALID")
+  field(SVSV,    "INVALID")
+  field(EISV,    "INVALID")
+  field(NISV,    "INVALID")
+  field(TESV,    "INVALID")
+  field(ELSV,    "INVALID")
+  field(TVSV,    "INVALID")
+  field(TTSV,    "INVALID")
+  field(FTSV,    "INVALID")
+  field(FFSV,    "INVALID")
+  field(UNSV,    "INVALID")
+  field(IVOA,    "Don't drive outputs")
+  info(autosaveFields_pass0, "VAL")
+}
+
+record(ao,       "$(S1){$(D1)}Time:Dly-SP") {
+  field(DTYP,    "asynFloat64")
+  field(OUT ,    "@asyn($(PORT),0)Scope Delay")
+  field(VAL ,    "0.0")
+  field(PREC,    "3")
+  field(DRVH,    "1")
+  field(DRVL,    "0")
+  field(HOPR,    "1")
+  field(LOPR,    "0")
+  field(IVOA,    "Don't drive outputs")
+  info(autosaveFields, "VAL")
+}
+
+record(ao,      "$(S1){$(D1)}Time:PDly-SP") {
+  info(autosaveFields_pass0, "VAL")
+}
+
+
+record(bo,       "$(S1){$(D1)-$(TBL1)}Enbl:Cmd") {
+  field(DESC,    "FF Enable:")
+  field(DTYP,    "asynInt32")
+  field(OUT ,    "@asyn($(PORT),0)FF Enable")
+  field(ZNAM,    "Disabled")
+  field(ONAM,    "Enabled")
+  field(IVOA,    "Don't drive outputs")
+  info(autosaveFields, "VAL")
+}
+
+record(bo,       "$(S1){$(D1)-$(TBL2)}Enbl:Cmd") {
+  field(DESC,    "FB Loop:")
+  field(DTYP,    "asynInt32")
+  field(OUT ,    "@asyn($(PORT),0)Feedback Enable")
+  field(ZNAM,    "Opened")
+  field(ONAM,    "Closed")
+  field(IVOA,    "Don't drive outputs")
+  info(autosaveFields, "VAL")
+}
+
+record(bo,       "$(S1){$(D1)}Enbl:ADC") {
+  field(DTYP,    "asynInt32")
+  field(DESC,    "Scope trigger:")
+  field(OUT ,    "@asyn($(PORT),0)Scope Trigger")
+  field(ZNAM,    "External")
+  field(ONAM,    "Internal")
+  field(IVOA,    "Don't drive outputs")
+  info(autosaveFields_pass1, "VAL SCAN")
+}
+
+record(ao,       "$(S1){$(D1)}Gain:I-SP") {
+  field(DESC,    "Gain: setpoint Ki")
+  field(DTYP,    "asynFloat64")
+  field(OUT ,    "@asyn($(PORT),0)I Gain")
+  field(VAL ,    "0")
+  field(PREC,    "3")
+  field(DRVH,    "1")
+  field(DRVL,    "0")
+  field(HOPR,    "1")
+  field(LOPR,    "0")
+  field(IVOA,    "Don't drive outputs")
+  info(autosaveFields, "VAL")
+}
+
+record(ao,       "$(S1){$(D1)}Gain:P-SP") {
+  field(DESC,    "Gain: setpoint Kp")
+  field(DTYP,    "asynFloat64")
+  field(OUT ,    "@asyn($(PORT),0)P Gain")
+  field(VAL ,    "0")
+  field(PREC,    "3")
+  field(DRVH,    "1")
+  field(DRVL,    "0")
+  field(HOPR,    "1")
+  field(LOPR,    "0")
+  field(IVOA,    "Don't drive outputs")
+  info(autosaveFields, "VAL")
+  field(FLNK,    "$(S1){$(D1)}rot_I-SP1_")
+}
+
+record(ao,       "$(S1){$(D1)}Phs:Loop-SP") {
+  field(DESC,    "Setpoint:")
+  field(DTYP,    "asynFloat64")
+  field(OUT ,    "@asyn($(PORT),0)Loop Phase")
+  field(VAL ,    "0.0")
+  field(EGU ,    "deg")
+  field(PREC,    "1")
+  field(DRVH,    "180")
+  field(DRVL,    "-180")
+  field(HOPR,    "180")
+  field(LOPR,    "-180")
+  field(IVOA,    "Don't drive outputs")
+  info(autosaveFields, "VAL")
+  field(FLNK,    "$(S1){$(D1)}rot_I-SP1_")
+}
+
+record(calcout,  "$(S1){$(D1)}rot_I-SP1_") {
+  field(CALC,    "COS((A/360+0.5)*2*PI-PI)*32767*B")
+  field(INPA,    "$(S1){$(D1)}Phs:Loop-SP")
+  field(INPB,    "$(S1){$(D1)}Gain:P-SP")
+  field(OUT,     "$(S1){$(D1)}rot_I-SP")
+  field(FLNK,    "$(S1){$(D1)}rot_Q-SP1_")
+}
+
+record(calcout,  "$(S1){$(D1)}rot_Q-SP1_") {
+  field(CALC,    "SIN((A/360+0.5)*2*PI-PI)*32767*B")
+  field(INPA,    "$(S1){$(D1)}Phs:Loop-SP")
+  field(INPB,    "$(S1){$(D1)}Gain:P-SP")
+  field(OUT,     "$(S1){$(D1)}rot_Q-SP")
+  field(FLNK,    "$(S1){$(D1)}rot_I-SP")
+}
+
+record(ao,       "$(S1){$(D1)}rot_I-SP") {
+  field(DESC,    "Calculated rot I:")
+  field(FLNK,    "$(S1){$(D1)}rot_Q-SP")
+}
+
+record(ao,       "$(S1){$(D1)}rot_Q-SP") {
+  field(DESC,    "Calculated rot Q:")
+}
+
+record(ao,       "$(S1){$(D1)}E:Fb-SP") {
+  field(DESC,    "FB: setpoint Amp")
+  field(PREC,    "3")
+  field(DRVH,    "1")
+  field(DRVL,    "0")
+  field(HOPR,    "1")
+  field(LOPR,    "0")
+  field(IVOA,    "Don't drive outputs")
+  field(PINI,    "YES")
+#
+# Booster version:
+#
+  field(OUT,   "$(S1){$(D1)-$(TBL2)}E:Fb-SP PP")
+  info(autosaveFields_pass0, "VAL")
+}
+
+record(ao,       "$(S1){$(D1)}Phs:Fb-SP") {
+  field(DESC,    "FB: setpoint Pha")
+  field(PREC,    "1")
+  field(DRVH,    "360")
+  field(DRVL,    "-360")
+  field(HOPR,    "360")
+  field(LOPR,    "-360")
+  field(EGU ,    "deg")
+  field(IVOA,    "Don't drive outputs")
+  field(PINI,    "YES")
+#
+# Booster version:
+#
+  field(OUT,     "$(S1){$(D1)-$(TBL2)}Phs:Fb-SP PP")
+  info(autosaveFields_pass0, "VAL")
+}
+
+#
+# For booster version: SP change is over booster cycle, 0.5 ... 2 s
+# = ramping in CW mode slow => must use internal ramp tables,
+# i.e. switching between tables required
+#
+# SP:Pha-SP used as variable C by waveform generetor
+# => cannot be used as end variable for S function
+# Introduse a new input variable: Requested New Phase Setpoint: Req:Pha-SP
+# This sets the step for the phase stepping and triggers the phase step
+# sequence
+#
+
+record(aSub,     "$(S1){$(D1)}SP:IQ-Calc_") {
+  field(SNAM,    "AP2IQ")
+  field(FTA ,    "DOUBLE")
+  field(FTB ,    "DOUBLE")
+  field(FTVA ,   "DOUBLE")
+  field(FTVB ,   "DOUBLE")
+  field(INPA,    "$(S1){$(D1)}E:Fb-SP MSS")
+  field(INPB,    "$(S1){$(D1)}Phs:Fb-SP MSS")
+  field(OUTA,    "$(S1){$(D1)}SP:I-SP PP MSS")
+  field(OUTB,    "$(S1){$(D1)}SP:Q-SP PP MSS")
+}
+
+record(ao,       "$(S1){$(D1)}SP:I-SP") {
+#  field(DTYP,   "asynFloat64")
+#  field(OUT ,   "@asyn($(PORT),0)SP I")
+  field(VAL ,    "0.0")
+  field(PREC,    "3")
+  field(IVOA,    "Don't drive outputs")
+}
+
+record(ao,       "$(S1){$(D1)}SP:Q-SP") {
+#  field(DTYP,   "asynFloat64")
+#  field(OUT ,   "@asyn($(PORT),0)SP Q")
+  field(VAL ,    "0.0")
+  field(PREC,    "3")
+  field(IVOA,    "Don't drive outputs")
+}
+
+record(longin,   "$(S1){$(D1)}Cnt:Cycle-I") {
+  field(DTYP,    "asynInt32")
+  field(INP ,    "@asyn($(PORT),0)ADC count")
+  field(SCAN,    "I/O Intr")
+  field(FLNK,    "$(S1){$(D1)}State:Upd0-FOut")
+}
+
+record(fanout,   "$(S1){$(D1)}State:Upd0-FOut") {
+  field(LNK1,    "$(S1){$(D1)-Ref}Val:I-I")
+  field(LNK2,    "$(S1){$(D1)-Cav}Val:I-I")
+  field(LNK3,    "$(S1){$(D1)-Fwd}Val:I-I")
+  field(LNK4,    "$(S1){$(D1)-Rfl}Val:I-I")
+  field(LNK5,    "$(S1){$(D1)-Drv}Val:I-I")
+  field(FLNK,    "$(S1){$(D1)}State:Upd1-FOut")
+}
+
+record(fanout,   "$(S1){$(D1)}State:Upd1-FOut") {
+  field(LNK1,    "$(S1){$(D1)-s1b}Val:I-I")
+  field(FLNK,    "$(S1){$(D1)}State:Upd2-FOut")
+}
+
+record(fanout,   "$(S1){$(D1)}State:Upd2-FOut") {
+  field(LNK1,    "$(S1){$(D1)-s2b}Val:I-I")
+  field(FLNK,    "$(S1){$(D1)}State:Upd3-FOut")
+}
+
+record(fanout,   "$(S1){$(D1)}State:Upd3-FOut") {
+  field(LNK1,    "$(S1){$(D1)-s3b}Val:I-I")
+  field(FLNK,    "$(S1){$(D1)}Cmd:UpdMeas-FOut")
+}
+
+record(ai,       "$(S1){$(D1)}Time:Cycle-I") {
+  field(DTYP,    "asynFloat64")
+  field(INP ,    "@asyn($(PORT),0)ADC time")
+  field(SCAN,    "I/O Intr")
+  field(PREC,    "2")
+  field(EGU ,    "ms")
+  field(HIGH,    "10")
+  field(HSV ,    "MAJOR")
+  field(FLNK,    "$(S1){$(D1)}Time:CycleHist-I")
+}
+
+record(histogram,"$(S1){$(D1)}Time:CycleHist-I") {
+  field(SVL ,    "$(S1){$(D1)}Time:Cycle-I")
+  field(CMD ,    "Start")
+  field(ULIM,    "20")
+  field(LLIM,    "1")
+  field(NELM,    "39")
+}
+
+record(ai,       "$(S1){$(D1)}Time:Trig-I") {
+  field(DTYP,    "asynFloat64")
+  field(INP ,    "@asyn($(PORT),0)Trig time")
+  field(SCAN,    "I/O Intr")
+  field(PREC,    "2")
+  field(EGU ,    "ms")
+  field(HIGH,    "400")
+  field(HSV ,    "MINOR")
+  field(HIHI,    "600")
+  field(HHSV,    "MAJOR")
+  field(FLNK,    "$(S1){$(D1)}Time:TrigHist-I")
+}
+
+record(histogram,"$(S1){$(D1)}Time:TrigHist-I") {
+  field(SVL ,    "$(S1){$(D1)}Time:Trig-I")
+  field(CMD ,    "Start")
+  field(ULIM,    "1000")
+  field(LLIM,    "0")
+  field(NELM,    "10")
+}
+
+record(ai,       "$(S1){$(D1)}RefPhase-I") {
+  field(DTYP,    "asynFloat64")
+  field(INP ,    "@asyn($(PORT),0)Ref Phase")
+  field(SCAN,    "I/O Intr")
+  field(PREC,    "3")
+  field(HOPR,    "180")
+  field(LOPR,    "-180")
+  field(EGU ,    "deg")
+}
+
+record(waveform, "$(S1){$(D1)}T:Cnt-I") {
+  field(DTYP,    "asynFloat64ArrayIn")
+  field(INP ,    "@asyn($(PORT),0)CNT T")
+  field(FTVL,    "DOUBLE")
+  field(NELM,    "512")
+  field(EGU ,    "Count")
+  field(PINI,    "YES")
+}
+
+record(acalcout, "$(S1){$(D1)}Cnt:Val-Calc") {
+  field(CALC,    "IX")
+  field(NELM,    "512")
+  field(NUSE,    "512")
+  field(OUT,     "$(S1){$(D1)}Cnt:Val PP")
+  field(PINI,    "YES")
+}
+
+record(waveform, "$(S1){$(D1)}Cnt:Val") {
+  field(FTVL,    "DOUBLE")
+  field(NELM,    "512")
+  field(EGU,     "Count")
+}
+
+record(waveform, "$(S1){$(D1)}T:DAC-I") {
+  field(DTYP,    "asynFloat64ArrayIn")
+  field(INP ,    "@asyn($(PORT),0)DAC Time")
+  field(FTVL,    "DOUBLE")
+  field(NELM,    "512")
+  field(EGU ,    "us")
+  field(FLNK,    "$(S1){$(D1)}Time:Scope-I")
+}
+
+record(waveform, "$(S1){$(D1)}Time:Scope-I") {
+  field(FTVL,    "DOUBLE")
+  field(NELM,    "512")
+}
+
+record(acalcout, "$(S1){$(D1)}Time:Rescale_") {
+  field(CALC,    "AA*(B/512.0)")
+  field(INAA,    "$(S1){$(D1)}T:Cnt-I")
+  field(INPB,    "$(S1){$(D1)}Time:ScopeRange")
+  field(OOPT,    "Every Time")
+  field(DOPT,    "Use CALC")
+  field(NELM,    "512")
+  field(NUSE,    "512")
+  field(OUT,     "$(S1){$(D1)}Time:Scope-I PP")
+}
+
+record(stringin, "$(S1){$(D1)}TOD") {
+  field(DESC,    "Current date and time:")
+  field(DTYP,    "Soft Timestamp")
+  field(SCAN,    "1 second")
+  field(INP,     "@%m/%d/%Y %H:%M:%S")
+}
+
+
