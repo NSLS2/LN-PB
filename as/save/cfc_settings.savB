@@ -1,4 +1,4 @@
-# autosave R5.3	Automatically generated - DO NOT MODIFY - 250312-102728
+# autosave R5.3	Automatically generated - DO NOT MODIFY - 250522-103630
 RF-CT{iocln-pb}:CA_CLNT_CNT.HOPR 200
 RF-CT{iocln-pb}:CA_CLNT_CNT.LOPR 0
 RF-CT{iocln-pb}:CA_CLNT_CNT.HIHI 175
@@ -194,7 +194,7 @@ RF-CT{iocln-pb}:FD_FREE.LOW 20
 RF-CT{iocln-pb}:FD_FREE.LOLO 5
 RF-CT{iocln-pb}:FD_FREE.LSV 1
 RF-CT{iocln-pb}:FD_FREE.LLSV 2
-RF-CT{iocln-pb}:START_CNT.VAL 37
+RF-CT{iocln-pb}:START_CNT.VAL 45
 LN-RF{CFC:PB}Val:Zoom-Sel.VAL 0
 LN-RF{CFC:PB}Val:BitDir-SP.VAL /bitfiles
 LN-RF{CFC:PB}Val:BitFile-SP.VAL llrf_xem7_LN_Test.bit
